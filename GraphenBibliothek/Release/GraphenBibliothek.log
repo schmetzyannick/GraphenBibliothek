@@ -1,0 +1,9 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: Das Zwischenverzeichnis (Release\) enthält freigegebene Dateien aus einem anderen Projekt (GraphenBibliothek.vcxproj). Dies kann zu einem falschen Bereinigungs- und Neuerstellungsverhalten führen.
+  Graph.cpp
+  Kante.cpp
+  Knoten.cpp
+  main.cpp
+  Code wird generiert.
+  All 513 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Codegenerierung ist abgeschlossen.
+  GraphenBibliothek.vcxproj -> C:\Users\Yannick\Documents\!Master\1.Semester\MMI\Praktika\GraphenBibliothek\Release\GraphenBibliothek.exe
