@@ -1,15 +1,22 @@
 #pragma once
+#include <vector>
 
+using namespace std;
 class Knoten {
 private:
-	int knotenNummer = -1;
-	bool markBreitensuche = false;
+	int knotenNummer;
+	bool markBreitensuche;
+
 public:
-	Knoten() {};
-	Knoten(int nr);
+	vector<Knoten> *nachbarn;
+
+	Knoten();
+	Knoten(int, bool, vector<Knoten>*);
+	~Knoten();
 
 	int getKnotenNummer();
 	bool isMarked();
+
 
 	void markKnoten();
 	void setKnotenNummer(int);

@@ -8,15 +8,13 @@ Graph::Graph(bool gerichtet)
 	this->gerichtet = gerichtet;
 	this->kantenListe = vector<Kante>();
 	this->knotenListe = vector<Knoten>();
-	this->adjaListe = vector<vector<Knoten>>();
 }
 
-Graph::Graph(bool gerichtet, vector<Kante> kantenListe, vector<Knoten> knotenListe, vector<vector<Knoten>>adjaListe)
+Graph::Graph(bool gerichtet, vector<Kante> kantenListe, vector<Knoten> knotenListe)
 {
 	this->gerichtet = gerichtet;
 	this->kantenListe = kantenListe;
 	this->knotenListe = knotenListe;
-	this->adjaListe = adjaListe;
 }
 
 bool Graph::getGerichtet()
@@ -34,11 +32,6 @@ vector<Knoten> Graph::getKnotenListe()
 	return this->knotenListe;
 }
 
-vector<vector<Knoten>> Graph::getAdjaListe()
-{
-	return this->adjaListe;
-}
-
 void Graph::setGerichtet(bool gerichtet)
 {
 	this->gerichtet = gerichtet;
@@ -52,11 +45,6 @@ void Graph::setKantenListe(vector<Kante> kantenListe)
 void Graph::setKnotenListe(vector<Knoten> knotenListe)
 {
 	this->knotenListe = knotenListe;
-}
-
-void Graph::setAdjaListe(vector<vector<Knoten>> adjaList)
-{
-	this->adjaListe = adjaList;
 }
 
 void Graph::GraphFromTextfile()
@@ -80,8 +68,7 @@ void Graph::GraphFromTextfile()
 	try {
 		datei >> anzahlKnoten;
 		for (int i = 0; i < anzahlKnoten; i++) {
-			knotenListe.push_back(Knoten(i));
-			adjaListe.push_back(vector<Knoten>());
+			knotenListe.push_back(Knoten(i, false, new vector<Knoten>()));
 		}
 
 		int links;
@@ -91,22 +78,21 @@ void Graph::GraphFromTextfile()
 			while (datei >> links >> rechts)
 			{
 				kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 0));
-				adjaListe.at(links).push_back(knotenListe.at(rechts));
-				adjaListe.at(rechts).push_back(knotenListe.at(links));
+				this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+				this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
 			}
 		}
 		else {
 			while (datei >> links >> rechts)
 			{
 				kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1));
-				adjaListe.at(links).push_back(knotenListe.at(rechts));
+				this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
 			}
 		}
 		datei.close();
 	}
-	catch (...) {
-		datei.close();
-		throw exception("Detei Korrupt");
+	catch (exception e) {
+		throw e;
 	}
 	return;
 }
@@ -119,7 +105,7 @@ inline Knoten Graph::ersterUnmarkierter()
 		if (!iter->isMarked())
 			return *iter;
 	}
-	return Knoten(-1);
+	return Knoten();
 }
 
 inline void Graph::Breitensuche(int start)
@@ -130,8 +116,8 @@ inline void Graph::Breitensuche(int start)
 	while (!schlange.empty()) {
 		int tmp = schlange.front().getKnotenNummer();
 		schlange.pop_front();
-		for (vector<Knoten>::iterator iter = this->adjaListe.at(tmp).begin();
-			iter != this->adjaListe.at(tmp).end(); ++iter) {
+		for (vector<Knoten>::iterator iter = this->knotenListe.at(tmp).nachbarn->begin();
+			iter != this->knotenListe.at(tmp).nachbarn->end(); ++iter) {
 			int nr = iter->getKnotenNummer();
 			if (!knotenListe.at(nr).isMarked()) {
 				knotenListe.at(nr).markKnoten();

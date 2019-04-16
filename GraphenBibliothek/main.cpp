@@ -26,8 +26,8 @@ int main() {
 	try {
 		g.GraphFromTextfile();
 	}
-	catch (...) {
-		cout << "Bitte prüfen Sie die Textdatei auf Fehler!" << endl;
+	catch (exception e) {
+		cout << e.what() << endl;
 		system("pause");
 		return -1;
 	}

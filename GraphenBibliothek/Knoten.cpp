@@ -1,8 +1,22 @@
 #include "Knoten.h"
 
-Knoten::Knoten(int nr)
+Knoten::Knoten()
+{
+	this->knotenNummer = -1;
+	this->markBreitensuche = false;
+	this->nachbarn = new vector<Knoten>();
+}
+
+Knoten::Knoten(int nr, bool marked, vector<Knoten> *nachbarn)
 {
 	this->knotenNummer = nr;
+	this->markBreitensuche = marked;
+	this->nachbarn = nachbarn;
+}
+
+Knoten::~Knoten()
+{
+	delete nachbarn;
 }
 
 int Knoten::getKnotenNummer()
