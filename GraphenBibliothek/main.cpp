@@ -53,6 +53,7 @@ int main() {
 	cout << endl << endl << "Graph eingelesen! " << endl;
 	//P1
 	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
+	g.KruskalMST();
 	system("pause");
 	return 0;
 }

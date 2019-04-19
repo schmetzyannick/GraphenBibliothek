@@ -177,3 +177,99 @@ int Graph::Zusammenhangskomponenten()
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 	return komponenten;
 }
+
+shared_ptr<vector<Kante>> Graph::KruskalMST()
+{
+	vector<Kante> copyKantenListe = this->getKantenListe();
+	this->sortKantenListe();
+
+	shared_ptr<vector<Kante>> mst = make_shared<vector<Kante>>();
+	vector<int>mstKnoten = vector<int>();
+	double mstGewicht =0;
+
+	int mst_index = 0;
+	while (mst->size() < knotenListe.size()-1 && mst_index < kantenListe.size()-1) {
+		Kante nachsteKante = this->kantenListe[mst_index];
+		if (find(mstKnoten.begin(), mstKnoten.end(), nachsteKante.getLinks().getKnotenNummer()) == mstKnoten.end() 
+			|| find(mstKnoten.begin(), mstKnoten.end(), nachsteKante.getRechts().getKnotenNummer()) == mstKnoten.end()) {
+			mstKnoten.push_back(nachsteKante.getLinks().getKnotenNummer());
+			mstKnoten.push_back(nachsteKante.getRechts().getKnotenNummer());
+			mst->push_back(nachsteKante);
+			mstGewicht += nachsteKante.getGewicht();
+		}
+		mst_index++;
+	}
+	cout << mstGewicht << endl;
+	this->setKantenListe(copyKantenListe);
+	return mst;
+}
+
+void Graph::sortKantenListe()
+{
+	mergeSort(0, kantenListe.size() - 1);
+}
+
+//Merge Sort
+void Graph::mergeSort(int l, int r)
+{
+	if (l < r) {
+		int m = (l+r)/2;
+
+		mergeSort(l, m);
+		mergeSort(m + 1, r);
+		merge(l, m, r);
+	}
+}
+
+void Graph::merge(int links, int mitte, int rechts)
+{
+	int i, j, k;
+	int n1 = mitte - links + 1;
+	int n2 = rechts - mitte;
+
+	/* Temporäre Vectoren */
+	vector<Kante> copyLinks, copyRechts;
+
+	/* Copy data to temp vectors L[] and R[] */
+	for (i = 0; i < n1; i++)
+		copyLinks.push_back(kantenListe[links + i]);
+	for (j = 0; j < n2; j++)
+		copyRechts.push_back(kantenListe[mitte + 1 + j]);
+
+	/* Merge the temp arrays back into arr[l..r]*/
+	i = 0; // Initial index of first subarray 
+	j = 0; // Initial index of second subarray 
+	k = links; // Initial index of merged subarray 
+	while (i < n1 && j < n2)
+	{
+		if (copyLinks.at(i).getGewicht() <= copyRechts.at(j).getGewicht())
+		{
+			kantenListe[k] = copyLinks[i];
+			i++;
+		}
+		else
+		{
+			kantenListe[k] = copyRechts[j];
+			j++;
+		}
+		k++;
+	}
+
+	/* Copy the remaining elements of L[], if there
+	   are any */
+	while (i < n1)
+	{
+		kantenListe[k] = copyLinks[i];
+		i++;
+		k++;
+	}
+	/* Copy the remaining elements of R[], if there
+	   are any */
+	while (j < n2)
+	{
+		kantenListe[k] = copyRechts[j];
+		j++;
+		k++;
+	}
+}
+

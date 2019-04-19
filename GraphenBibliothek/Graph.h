@@ -32,4 +32,9 @@ public:
 	inline Knoten ersterUnmarkierter();
 	inline void Breitensuche(int start);
 	int Zusammenhangskomponenten();
+
+	shared_ptr<vector<Kante>> KruskalMST();
+	void sortKantenListe();
+	void mergeSort(int l, int r);
+	void merge(int links, int mitte, int rechts);
 };
