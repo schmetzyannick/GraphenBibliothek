@@ -5,9 +5,10 @@ Kante::Kante()
 	this->links = Knoten();
 	this->rechts = Knoten();
 	richtung = ungerichtet;
+	this->gewicht = 0.0;
 }
 
-Kante::Kante(Knoten links, Knoten rechts, int richtung)
+Kante::Kante(Knoten links, Knoten rechts, int richtung/*=0*/, double gewicht/*=0.0.*/)
 {
 	this->links = links;
 	this->rechts = rechts;
@@ -17,6 +18,7 @@ Kante::Kante(Knoten links, Knoten rechts, int richtung)
 	else {
 		this->richtung = KantenRichtung(0);
 	}
+	this->gewicht=gewicht;
 }
 
 Knoten Kante::getLinks()
@@ -32,6 +34,11 @@ Knoten Kante::getRechts()
 int Kante::getRichtung()
 {
 	return richtung;
+}
+
+double Kante::getGewicht()
+{
+	return this->gewicht;
 }
 
 void Kante::setLinks(Knoten l)
@@ -52,4 +59,9 @@ void Kante::setRichtung(int richtung)
 	else {
 		this->richtung = KantenRichtung(0);
 	}
+}
+
+void Kante::setGewicht(double gewicht)
+{
+	this->gewicht = gewicht;
 }

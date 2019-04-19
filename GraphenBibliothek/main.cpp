@@ -22,7 +22,25 @@ int main() {
 	bool gerichtet;
 	gerichtetInt == 1 ? gerichtet = false : gerichtet = true;
 
-	Graph g = Graph(gerichtet);
+
+	cout << "Moechten Sie einen gewichteten oder ungewichteten Graph einlesen?" << endl;
+	cout << "[1] Ungewichteter Graph \n[2] Gewichteter Graph\n";
+	cout << "1 oder 2 eingeben: ";
+
+	int gewichtetInt;
+	cin >> gewichtetInt;
+
+	while (gerichtetInt < 1 || gerichtetInt >2) {
+		cout << endl << "Falsche Eingabe!" << endl;
+		cout << "[1] Ungewichteter Graph \n[2] Gewichteter Graph\n";
+		cout << "1 oder 2 eingeben: ";
+		cin >> gewichtetInt;
+	}
+
+	bool gewichtet;
+	gewichtetInt == 1 ? gewichtet = false : gewichtet = true;
+
+	Graph g = Graph(gerichtet, gewichtet);
 	try {
 		g.GraphFromTextfile();
 	}
@@ -33,7 +51,8 @@ int main() {
 	}
 
 	cout << endl << endl << "Graph eingelesen! " << endl;
-	cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
+	//P1
+	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
 	system("pause");
 	return 0;
 }

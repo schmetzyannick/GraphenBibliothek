@@ -4,19 +4,14 @@ Knoten::Knoten()
 {
 	this->knotenNummer = -1;
 	this->markBreitensuche = false;
-	this->nachbarn = new vector<Knoten>();
+	this->nachbarn = std::make_shared<std::vector<Knoten>>();
 }
 
-Knoten::Knoten(int nr, bool marked, vector<Knoten> *nachbarn)
+Knoten::Knoten(int nr, bool marked, shared_ptr<vector<Knoten>> nachbarn)
 {
 	this->knotenNummer = nr;
 	this->markBreitensuche = marked;
 	this->nachbarn = nachbarn;
-}
-
-Knoten::~Knoten()
-{
-	delete nachbarn;
 }
 
 int Knoten::getKnotenNummer()

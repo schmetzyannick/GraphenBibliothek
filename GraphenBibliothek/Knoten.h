@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 
 using namespace std;
 class Knoten {
@@ -8,11 +9,10 @@ private:
 	bool markBreitensuche;
 
 public:
-	vector<Knoten> *nachbarn;
+	shared_ptr<vector<Knoten>> nachbarn;
 
 	Knoten();
-	Knoten(int, bool, vector<Knoten>*);
-	~Knoten();
+	Knoten(int, bool, shared_ptr<vector<Knoten>>);
 
 	int getKnotenNummer();
 	bool isMarked();
