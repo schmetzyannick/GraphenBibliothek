@@ -162,7 +162,7 @@ inline void Graph::Breitensuche(int start)
 
 int Graph::Zusammenhangskomponenten()
 {
-	clock_t anfang = clock();
+	/*clock_t anfang = clock();*/
 	Knoten naechster = this->ersterUnmarkierter();
 	int komponenten = 0;
 	for (vector<Knoten>::iterator iter = this->knotenListe.begin();
@@ -173,34 +173,45 @@ int Graph::Zusammenhangskomponenten()
 			Breitensuche(iter->getKnotenNummer());
 		}
 	}
-	clock_t ende = clock();
-	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+	//clock_t ende = clock();
+	//cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 	return komponenten;
 }
 
 shared_ptr<vector<Kante>> Graph::KruskalMST()
 {
+	if (Zusammenhangskomponenten() > 1) {
+		cout << "Der Graph muss zusammenhängend sein! " << endl;
+		return NULL;
+	}
+
+	clock_t anfang = clock();
 	vector<Kante> copyKantenListe = this->getKantenListe();
 	this->sortKantenListe();
 
-	shared_ptr<vector<Kante>> mst = make_shared<vector<Kante>>();
-	vector<int>mstKnoten = vector<int>();
-	double mstGewicht =0;
+	DisjointedSetKnoten dsKnoten(knotenListe.size());
+	vector<Kante>::iterator iterator;
 
-	int mst_index = 0;
-	while (mst->size() < knotenListe.size()-1 && mst_index < kantenListe.size()-1) {
-		Kante nachsteKante = this->kantenListe[mst_index];
-		if (find(mstKnoten.begin(), mstKnoten.end(), nachsteKante.getLinks().getKnotenNummer()) == mstKnoten.end() 
-			|| find(mstKnoten.begin(), mstKnoten.end(), nachsteKante.getRechts().getKnotenNummer()) == mstKnoten.end()) {
-			mstKnoten.push_back(nachsteKante.getLinks().getKnotenNummer());
-			mstKnoten.push_back(nachsteKante.getRechts().getKnotenNummer());
-			mst->push_back(nachsteKante);
-			mstGewicht += nachsteKante.getGewicht();
+	double mst_kosten = 0;
+	shared_ptr<vector<Kante>> mst = make_shared<vector<Kante>>();
+	for (iterator = kantenListe.begin(); iterator != kantenListe.end() 
+		|| mst->size() == knotenListe.size()-1; iterator++) {
+
+		int links = iterator->getLinks().getKnotenNummer();
+		int rechts = iterator->getRechts().getKnotenNummer();
+
+		int set_links = dsKnoten.find(links);
+		int set_rechts = dsKnoten.find(rechts);
+
+		if (set_links != set_rechts) {
+			mst_kosten += iterator->getGewicht();
+			dsKnoten.unionByRang(set_links, set_rechts);
 		}
-		mst_index++;
 	}
-	cout << mstGewicht << endl;
-	this->setKantenListe(copyKantenListe);
+	this->kantenListe = copyKantenListe;
+	cout << mst_kosten << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 	return mst;
 }
 
@@ -223,23 +234,21 @@ void Graph::mergeSort(int l, int r)
 
 void Graph::merge(int links, int mitte, int rechts)
 {
-	int i, j, k;
 	int n1 = mitte - links + 1;
 	int n2 = rechts - mitte;
 
 	/* Temporäre Vectoren */
 	vector<Kante> copyLinks, copyRechts;
 
-	/* Copy data to temp vectors L[] and R[] */
-	for (i = 0; i < n1; i++)
+	for (int i = 0; i < n1; i++)
 		copyLinks.push_back(kantenListe[links + i]);
-	for (j = 0; j < n2; j++)
+	for (int j = 0; j < n2; j++)
 		copyRechts.push_back(kantenListe[mitte + 1 + j]);
 
-	/* Merge the temp arrays back into arr[l..r]*/
-	i = 0; // Initial index of first subarray 
-	j = 0; // Initial index of second subarray 
-	k = links; // Initial index of merged subarray 
+
+	int i = 0;		// Initial index des linken vectors
+	int j = 0;		// Initial index des rechten vectors
+	int k = links;  // Initial index des ergebnis vectors
 	while (i < n1 && j < n2)
 	{
 		if (copyLinks.at(i).getGewicht() <= copyRechts.at(j).getGewicht())
@@ -255,16 +264,14 @@ void Graph::merge(int links, int mitte, int rechts)
 		k++;
 	}
 
-	/* Copy the remaining elements of L[], if there
-	   are any */
+	/* Rest links kopieren */
 	while (i < n1)
 	{
 		kantenListe[k] = copyLinks[i];
 		i++;
 		k++;
 	}
-	/* Copy the remaining elements of R[], if there
-	   are any */
+	/* Rest rechts kopieren */
 	while (j < n2)
 	{
 		kantenListe[k] = copyRechts[j];
@@ -272,4 +279,3 @@ void Graph::merge(int links, int mitte, int rechts)
 		k++;
 	}
 }
-
