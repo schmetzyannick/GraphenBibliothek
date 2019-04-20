@@ -2,6 +2,8 @@
 #include <fstream>
 #include <list>
 #include <time.h>
+#include <queue>
+#include <math.h>
 
 Graph::Graph(bool gerichtet, bool gewichtet)
 {
@@ -81,7 +83,8 @@ void Graph::GraphFromTextfile()
 		datei >> anzahlKnoten;
 		for (int i = 0; i < anzahlKnoten; i++) {
 			shared_ptr<vector<Knoten>> nachbarn = make_shared<vector<Knoten>>();
-			this->knotenListe.push_back(Knoten(i, false, nachbarn));
+			shared_ptr<vector<Kante>> anliegend = make_shared<vector<Kante>>();
+			this->knotenListe.push_back(Knoten(i, false, nachbarn, anliegend));
 		}
 
 		int links;
@@ -95,6 +98,9 @@ void Graph::GraphFromTextfile()
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts)));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
 					this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
+
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+					this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 			else {
@@ -103,6 +109,9 @@ void Graph::GraphFromTextfile()
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 0, gewicht));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
 					this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
+
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+					this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 		}
@@ -112,6 +121,7 @@ void Graph::GraphFromTextfile()
 				{
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 			else {
@@ -119,6 +129,7 @@ void Graph::GraphFromTextfile()
 				{
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1, gewicht));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 		}
@@ -278,4 +289,16 @@ void Graph::merge(int links, int mitte, int rechts)
 		j++;
 		k++;
 	}
+}
+
+void Graph::PrimMST()
+{
+	clock_t anfang = clock();
+	
+	priority_queue<Knoten> mst = priority_queue<Knoten>();
+
+
+
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 }

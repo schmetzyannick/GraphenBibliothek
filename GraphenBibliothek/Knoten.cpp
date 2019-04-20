@@ -1,17 +1,20 @@
 #include "Knoten.h"
+#include "Kante.h"
 
 Knoten::Knoten()
 {
 	this->knotenNummer = -1;
 	this->markBreitensuche = false;
-	this->nachbarn = std::make_shared<std::vector<Knoten>>();
+	this->nachbarn = make_shared<vector<Knoten>>();
+	this->anliegendeKanten = make_shared<vector<Kante>>();
 }
 
-Knoten::Knoten(int nr, bool marked, shared_ptr<vector<Knoten>> nachbarn)
+Knoten::Knoten(int nr, bool marked, shared_ptr<vector<Knoten>> nachbarn, shared_ptr<vector<Kante>> anliegendeKanten)
 {
 	this->knotenNummer = nr;
 	this->markBreitensuche = marked;
 	this->nachbarn = nachbarn;
+	this->anliegendeKanten = anliegendeKanten;
 }
 
 int Knoten::getKnotenNummer()
