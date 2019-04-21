@@ -2,6 +2,8 @@
 #include <vector>
 #include <iostream>
 
+class Kante;
+
 using namespace std;
 class Knoten {
 private:
@@ -10,9 +12,10 @@ private:
 
 public:
 	shared_ptr<vector<Knoten>> nachbarn;
+	shared_ptr<vector<Kante>> anliegendeKanten;
 
 	Knoten();
-	Knoten(int, bool, shared_ptr<vector<Knoten>>);
+	Knoten(int, bool, shared_ptr<vector<Knoten>>, shared_ptr<vector<Kante>>);
 
 	int getKnotenNummer();
 	bool isMarked();

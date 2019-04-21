@@ -2,6 +2,9 @@
 #include <fstream>
 #include <list>
 #include <time.h>
+#include <queue>
+#include <math.h>
+#include <set>
 
 Graph::Graph(bool gerichtet, bool gewichtet)
 {
@@ -81,7 +84,8 @@ void Graph::GraphFromTextfile()
 		datei >> anzahlKnoten;
 		for (int i = 0; i < anzahlKnoten; i++) {
 			shared_ptr<vector<Knoten>> nachbarn = make_shared<vector<Knoten>>();
-			this->knotenListe.push_back(Knoten(i, false, nachbarn));
+			shared_ptr<vector<Kante>> anliegend = make_shared<vector<Kante>>();
+			this->knotenListe.push_back(Knoten(i, false, nachbarn, anliegend));
 		}
 
 		int links;
@@ -95,6 +99,9 @@ void Graph::GraphFromTextfile()
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts)));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
 					this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
+
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+					this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 			else {
@@ -103,6 +110,9 @@ void Graph::GraphFromTextfile()
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 0, gewicht));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
 					this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
+
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+					this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 		}
@@ -112,6 +122,7 @@ void Graph::GraphFromTextfile()
 				{
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 			else {
@@ -119,6 +130,7 @@ void Graph::GraphFromTextfile()
 				{
 					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1, gewicht));
 					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
 				}
 			}
 		}
@@ -180,8 +192,8 @@ int Graph::Zusammenhangskomponenten()
 
 shared_ptr<vector<Kante>> Graph::KruskalMST()
 {
-	if (Zusammenhangskomponenten() > 1) {
-		cout << "Der Graph muss zusammenhängend sein! " << endl;
+	if (Zusammenhangskomponenten() > 1 || this->gerichtet==true) {
+		cout << "Der Graph muss zusammenhängend und ungerichtet sein! " << endl;
 		return NULL;
 	}
 
@@ -278,4 +290,61 @@ void Graph::merge(int links, int mitte, int rechts)
 		j++;
 		k++;
 	}
+}
+
+vector<Kante> Graph::PrimMST()
+{
+	clock_t anfang = clock();
+	
+	//Kanten werden automatisch nach ihrem gewicht sortiert
+	priority_queue<Kante, vector<Kante>, KantenVergleichen> pq = priority_queue<Kante, vector<Kante>, KantenVergleichen>();
+
+	//Kanten des mst
+	vector<Kante> mst = vector<Kante>();
+
+	Knoten aktuellerKnoten = knotenListe[0];
+
+	//hält die bereits besuchten Knoten
+	set<int> besuchteKnoten = set<int>();
+	besuchteKnoten.insert(aktuellerKnoten.getKnotenNummer());
+
+	double weight = 0.0;
+	bool addKanten = true;
+
+	while (mst.size() < knotenListe.size() - 1) {
+		//wurde der aktuelleKnoten geaendert und somit eine Kante zum mst hinzugefuegt?
+		if (addKanten) {
+			//fuege Kanten des neuen Knoten in die pq
+			for (vector<Kante>::iterator iterKanten = aktuellerKnoten.anliegendeKanten->begin();
+				iterKanten != aktuellerKnoten.anliegendeKanten->end(); ++iterKanten) {
+				pq.push(*iterKanten);
+			}
+		}
+		
+		Kante toInsert = pq.top();
+		pq.pop();
+		//linker Knoten noch nicht besucht
+		if (besuchteKnoten.find(toInsert.getLinks().getKnotenNummer()) == besuchteKnoten.end()) {
+			mst.push_back(toInsert);
+			weight += toInsert.getGewicht();
+			besuchteKnoten.insert(toInsert.getLinks().getKnotenNummer());
+			aktuellerKnoten = toInsert.getLinks();
+			addKanten = true;
+		}//rechter Knoten noch nicht besucht
+		else if(besuchteKnoten.find(toInsert.getRechts().getKnotenNummer()) == besuchteKnoten.end()){
+			mst.push_back(toInsert);
+			weight += toInsert.getGewicht();
+			besuchteKnoten.insert(toInsert.getRechts().getKnotenNummer());
+			aktuellerKnoten = toInsert.getRechts();
+			addKanten = true;
+		}//beide Knoten bereits besucht
+		else {
+			addKanten = false;
+		}
+	}
+
+	cout << "Kosten: " << weight << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+	return mst;
 }
