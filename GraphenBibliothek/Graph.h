@@ -39,5 +39,5 @@ public:
 	void mergeSort(int l, int r);
 	void merge(int links, int mitte, int rechts);
 
-	void PrimMST();
+	vector<Kante> PrimMST();
 };
