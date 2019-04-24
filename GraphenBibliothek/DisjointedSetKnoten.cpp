@@ -2,6 +2,7 @@
 
 DisjointedSetKnoten::DisjointedSetKnoten(int n)
 {
+	//Anzahl Knoten
 	this->n = n;
 	parent = new int[n + 1];
 	rang = new int[n + 1];

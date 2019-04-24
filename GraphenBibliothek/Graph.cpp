@@ -198,6 +198,7 @@ shared_ptr<vector<Kante>> Graph::KruskalMST()
 	}
 
 	clock_t anfang = clock();
+
 	vector<Kante> copyKantenListe = this->getKantenListe();
 	this->sortKantenListe();
 
@@ -206,8 +207,8 @@ shared_ptr<vector<Kante>> Graph::KruskalMST()
 
 	double mst_kosten = 0;
 	shared_ptr<vector<Kante>> mst = make_shared<vector<Kante>>();
-	for (iterator = kantenListe.begin(); iterator != kantenListe.end() 
-		|| mst->size() == knotenListe.size()-1; iterator++) {
+	for (iterator = kantenListe.begin(); (iterator != kantenListe.end())
+		|| mst->size() != this->knotenListe.size()-1; ++iterator) {
 
 		int links = iterator->getLinks().getKnotenNummer();
 		int rechts = iterator->getRechts().getKnotenNummer();
@@ -216,6 +217,7 @@ shared_ptr<vector<Kante>> Graph::KruskalMST()
 		int set_rechts = dsKnoten.find(rechts);
 
 		if (set_links != set_rechts) {
+			mst->push_back(*iterator);
 			mst_kosten += iterator->getGewicht();
 			dsKnoten.unionByRang(set_links, set_rechts);
 		}
@@ -305,6 +307,7 @@ vector<Kante> Graph::PrimMST()
 	Knoten aktuellerKnoten = knotenListe[0];
 
 	//hält die bereits besuchten Knoten
+	//Verbesserung: array mit bool stelle = Knotennummer
 	set<int> besuchteKnoten = set<int>();
 	besuchteKnoten.insert(aktuellerKnoten.getKnotenNummer());
 
@@ -315,6 +318,7 @@ vector<Kante> Graph::PrimMST()
 		//wurde der aktuelleKnoten geaendert und somit eine Kante zum mst hinzugefuegt?
 		if (addKanten) {
 			//fuege Kanten des neuen Knoten in die pq
+			//Verbesserung: nur Kanten bei denen nicht beide Knoten besucht sind
 			for (vector<Kante>::iterator iterKanten = aktuellerKnoten.anliegendeKanten->begin();
 				iterKanten != aktuellerKnoten.anliegendeKanten->end(); ++iterKanten) {
 				pq.push(*iterKanten);
