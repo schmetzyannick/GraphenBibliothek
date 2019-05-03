@@ -54,7 +54,9 @@ int main() {
 	//P1
 	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
 
+	cout << "\nKruskal: \n";
 	g.KruskalMST();
+	cout << "\nPrim: \n";
 	g.PrimMST();
 	system("pause");
 	return 0;
