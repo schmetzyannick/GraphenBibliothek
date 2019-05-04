@@ -38,3 +38,11 @@ public:
 		return p1.getConstGewicht() > p2.getConstGewicht();
 	}
 };
+
+class KantenVergleichenKleinerAls {
+public:
+	int operator() (const Kante& p1, const Kante& p2)
+	{
+		return p1.getConstGewicht() < p2.getConstGewicht();
+	}
+};

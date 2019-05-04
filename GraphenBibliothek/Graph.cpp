@@ -352,3 +352,73 @@ vector<Kante> Graph::PrimMST()
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 	return mst;
 }
+
+vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
+{
+	if (startKnoten > knotenListe.size() - 1) {
+		throw exception("Startknoten existiert nicht!");
+	}
+
+	clock_t anfang = clock();
+
+	//zum markieren der bereits besuchten Knoten
+	deque<int> besuchteKnoten = deque<int>();
+	for (int i = 0; i < knotenListe.size(); i++) {
+		besuchteKnoten.push_back(false);
+	}
+
+	vector<Kante> tour = vector<Kante>();
+	Knoten aktuell = knotenListe[startKnoten];
+	besuchteKnoten[startKnoten] = true;
+
+	double kosten = 0.0;
+	int counter = 1;
+
+	//n-1 Kanten -> danach tour schlieﬂen
+	while (counter < knotenListe.size()) {
+		Kante k;
+	
+		shared_ptr<vector<Kante>> anliegendeKantenSorted = aktuell.getKantenlisteSortet();
+		vector<Kante>::iterator iter = anliegendeKantenSorted->begin();
+		//finde die guenstigste Kante zu einem noch nicht besuchten Knoten
+		for (; iter != anliegendeKantenSorted->end(); ++iter) {
+			k = *iter;
+			if ((k.getLinks().getKnotenNummer() == aktuell.getKnotenNummer())
+				&& (besuchteKnoten[k.getRechts().getKnotenNummer()] == false)) {
+				break;
+			}
+			else if ((k.getRechts().getKnotenNummer() == aktuell.getKnotenNummer())
+				&& (besuchteKnoten[k.getLinks().getKnotenNummer()] == false)) {
+				break;
+			}
+		}
+
+		tour.push_back(k);
+		kosten += k.getGewicht();
+
+		counter++;
+		if (k.getLinks().getKnotenNummer() == aktuell.getKnotenNummer()) {
+			aktuell = k.getRechts();
+			besuchteKnoten[k.getRechts().getKnotenNummer()] = true;
+		}
+		else {
+			aktuell = k.getLinks();
+			besuchteKnoten[k.getLinks().getKnotenNummer()] = true;
+		}
+	}
+
+	//schlieﬂe die tour
+	try {
+		Kante k = aktuell.getGuenstigsteKantezuKnoten(startKnoten);
+		kosten += k.getGewicht();
+		tour.push_back(k);
+	}
+	catch (exception e) {
+		throw e;
+	}
+
+	cout << "Kosten: " << kosten << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+	return tour;
+}

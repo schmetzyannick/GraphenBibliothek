@@ -54,10 +54,21 @@ int main() {
 	//P1
 	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
 
-	cout << "\nKruskal: \n";
+	//P2
+	/*cout << "\nKruskal: \n";
 	g.KruskalMST();
 	cout << "\nPrim: \n";
 	g.PrimMST();
+	system("pause");*/
+
+	try {
+		for (int i = 0; i <= g.getKnotenListe().size(); i++) {
+			g.NearestNeighborTSP(i);
+		}
+	}
+	catch (exception e) {
+		cout << e.what() << endl;
+	}
 	system("pause");
 	return 0;
 }
