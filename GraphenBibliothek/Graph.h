@@ -51,6 +51,8 @@ public:
 	//P3: TSP
 	vector<Kante> NearestNeighborTSP(int);
 	void ReduceMatrix(shared_ptr<vector<vector<double>>>&, double&);
-	void BranchAndBound(Node, BABTree*);
-	vector<Kante> BranchAndBoundTSP(int);
+	void BranchAndBound(Node, BABTree*, bool bound=true);
+	vector<Kante> BranchAndBoundTSP();
+
+	vector<Kante> TSPAusprobieren();
 };

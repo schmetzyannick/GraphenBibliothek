@@ -572,10 +572,10 @@ void Graph::ReduceMatrix(shared_ptr<vector<vector<double>>> &matrix , double &re
 	}
 }
 
-void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree)
+void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*/)
 {
 	//schneide ast ab -> bound
-	if (tree->firstTourFound && aktuellerNode.kostenBisher > tree->besteTour) {
+	if (bound && tree->firstTourFound && aktuellerNode.kostenBisher > tree->besteTour) {
 		aktuellerNode.kill = true;
 		return; 
 	}
@@ -632,12 +632,8 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree)
 	}
 }
 
-vector<Kante> Graph::BranchAndBoundTSP(int startKnoten)
+vector<Kante> Graph::BranchAndBoundTSP()
 {
-	if (startKnoten > knotenListe.size() - 1) {
-		throw exception("Startknoten existiert nicht!");
-	}
-
 	clock_t anfang = clock();
 	BABTree tree = BABTree(this->knotenListe[0], this->knotenListe.size());
 	BranchAndBound(tree.root, &tree);
@@ -646,4 +642,17 @@ vector<Kante> Graph::BranchAndBoundTSP(int startKnoten)
 	clock_t ende = clock();
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 	return tree.tour;
+}
+
+vector<Kante> Graph::TSPAusprobieren()
+{
+	clock_t anfang = clock();
+	BABTree tree = BABTree(this->knotenListe[0], this->knotenListe.size());
+	BranchAndBound(tree.root, &tree);
+
+	cout << "Kosten: " << tree.besteTour << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+	return tree.tour;
+	return vector<Kante>();
 }
