@@ -30,6 +30,9 @@
     <ClCompile Include="DisjointedSetKnoten.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="BranchAndBoundTree.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Knoten.h">
@@ -42,6 +45,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="DisjointedSetKnoten.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="BranchAndBoundTree.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

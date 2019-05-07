@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include "DisjointedSetKnoten.h"
+#include "BranchAndBoundTree.h"
 
 using namespace std;
 
@@ -23,6 +24,7 @@ public:
 	bool getGewichtet();
 	vector<Kante> getKantenListe();
 	vector<Knoten> getKnotenListe();
+	shared_ptr<vector<vector<double>>> buildAdjaMatrix();
 
 	//setter
 	void setGerichtet(bool);
@@ -48,4 +50,7 @@ public:
 
 	//P3: TSP
 	vector<Kante> NearestNeighborTSP(int);
+	void ReduceMatrix(shared_ptr<vector<vector<double>>>&, double&);
+	void BranchAndBound(Node, BABTree*);
+	vector<Kante> BranchAndBoundTSP(int);
 };

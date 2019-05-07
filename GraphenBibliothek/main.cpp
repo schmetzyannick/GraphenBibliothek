@@ -63,12 +63,15 @@ int main() {
 
 	try {
 		for (int i = 0; i <= g.getKnotenListe().size(); i++) {
+			cout << "start: " << i << endl;
 			g.NearestNeighborTSP(i);
 		}
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
 	}
+	
+	//vector<Kante> tour = g.BranchAndBoundTSP(0);
 	system("pause");
 	return 0;
 }
