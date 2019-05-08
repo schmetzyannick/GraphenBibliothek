@@ -46,13 +46,13 @@ public:
 	void mergeSort(int l, int r);
 	void merge(int links, int mitte, int rechts);
 
-	vector<Kante> PrimMST();
+	vector<Kante> PrimMST(int start);
 
 	//P3: TSP
 	vector<Kante> NearestNeighborTSP(int);
 	void ReduceMatrix(shared_ptr<vector<vector<double>>>&, double&);
 	void BranchAndBound(Node, BABTree*, bool bound=true);
 	vector<Kante> BranchAndBoundTSP();
-
 	vector<Kante> TSPAusprobieren();
+	vector<Kante> DoppelterBaumTSP(int);
 };

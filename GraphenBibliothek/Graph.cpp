@@ -404,7 +404,7 @@ void Graph::merge(int links, int mitte, int rechts)
 	}
 }
 
-vector<Kante> Graph::PrimMST()
+vector<Kante> Graph::PrimMST(int start)
 {
 	clock_t anfang = clock();
 	
@@ -414,7 +414,7 @@ vector<Kante> Graph::PrimMST()
 	//Kanten des mst
 	vector<Kante> mst = vector<Kante>();
 
-	Knoten aktuellerKnoten = knotenListe[0];
+	Knoten aktuellerKnoten = knotenListe[start];
 
 	//hält die bereits besuchten Knoten
 	//Verbesserung: array mit bool stelle = Knotennummer
@@ -656,5 +656,50 @@ vector<Kante> Graph::TSPAusprobieren()
 	clock_t ende = clock();
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 	return tree.tour;
+	return vector<Kante>();
+}
+
+vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
+{
+	vector<Kante> mstVec = PrimMST(startKnoten);
+	deque<Kante> mst = deque<Kante>();
+	for (int i = 0; i < mstVec.size(); i++) {
+		mst.push_back(mstVec[i]);
+	}
+
+	vector<Kante> tspTour = vector<Kante>();
+
+	vector<bool> besucht = vector<bool>();
+	for (int i = 0; i < knotenListe.size(); i++) {
+		besucht.push_back(false);
+	}
+	besucht[startKnoten] = true;
+	int aktuellerKnoten = startKnoten;
+	double kosten = 0.0;
+	while (!mst.empty()) {
+		Kante k = mst[0];
+
+		if (k.getLinks().getKnotenNummer() == aktuellerKnoten && besucht[k.getRechts().getKnotenNummer()] == false) {
+			tspTour.push_back(k);
+			mst.pop_front();
+
+			kosten += k.getGewicht();
+			besucht[k.getRechts().getKnotenNummer()] = true;
+			aktuellerKnoten = k.getRechts().getKnotenNummer();
+		}else if (k.getRechts().getKnotenNummer() == aktuellerKnoten && besucht[k.getLinks().getKnotenNummer()] == false) {
+			tspTour.push_back(k);
+			mst.pop_front();
+
+			kosten += k.getGewicht();
+			besucht[k.getLinks().getKnotenNummer()] = true;
+			aktuellerKnoten = k.getRechts().getKnotenNummer();
+		}
+		else {//aktueller Knoten nicht in mst => abkuerzung
+			if (besucht[k.getLinks().getKnotenNummer()] == false) {
+				k = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getLinks().getKnotenNummer());
+			}
+		}
+	}
+
 	return vector<Kante>();
 }
