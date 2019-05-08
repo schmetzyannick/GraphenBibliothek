@@ -495,26 +495,28 @@ vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
 			k = *iter;
 			if ((k.getLinks().getKnotenNummer() == aktuell.getKnotenNummer())
 				&& (besuchteKnoten[k.getRechts().getKnotenNummer()] == false)) {
+
+				tour.push_back(k);
+				kosten += k.getGewicht();
+
+				aktuell = k.getRechts();
+				besuchteKnoten[k.getRechts().getKnotenNummer()] = true;
+
 				break;
 			}
 			else if ((k.getRechts().getKnotenNummer() == aktuell.getKnotenNummer())
 				&& (besuchteKnoten[k.getLinks().getKnotenNummer()] == false)) {
+
+				tour.push_back(k);
+				kosten += k.getGewicht();
+
+				aktuell = k.getLinks();
+				besuchteKnoten[k.getLinks().getKnotenNummer()] = true;
+
 				break;
 			}
 		}
-
-		tour.push_back(k);
-		kosten += k.getGewicht();
-
 		counter++;
-		if (k.getLinks().getKnotenNummer() == aktuell.getKnotenNummer()) {
-			aktuell = k.getRechts();
-			besuchteKnoten[k.getRechts().getKnotenNummer()] = true;
-		}
-		else {
-			aktuell = k.getLinks();
-			besuchteKnoten[k.getLinks().getKnotenNummer()] = true;
-		}
 	}
 
 	//schlieﬂe die tour
