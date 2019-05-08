@@ -457,9 +457,9 @@ vector<Kante> Graph::PrimMST(int start)
 		}
 	}
 
-	cout << "Kosten: " << weight << endl;
+	/*cout << "Kosten: " << weight << endl;
 	clock_t ende = clock();
-	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;*/
 	return mst;
 }
 
@@ -577,10 +577,10 @@ void Graph::ReduceMatrix(shared_ptr<vector<vector<double>>> &matrix , double &re
 void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*/)
 {
 	//schneide ast ab -> bound
-	if (bound && tree->firstTourFound && aktuellerNode.kostenBisher > tree->besteTour) {
+	/*if (bound && tree->firstTourFound && aktuellerNode.kostenBisher > tree->besteTour) {
 		aktuellerNode.kill = true;
 		return; 
-	}
+	}*/
 
 	//iteriere ueber anliegende Kanten
 	vector<Kante>::iterator iter = aktuellerNode.knoten.anliegendeKanten->begin();
@@ -596,10 +596,17 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*
 			Node n = Node(kosten, iter->getRechts(), copy);
 			n.genutzteKanten = aktuellerNode.genutzteKanten;
 			n.genutzteKanten.push_back(*iter);
-			aktuellerNode.nachfolger.push_back(&n);
 
-			//Branching
-			BranchAndBound(n, tree);
+			if (bound && n.kostenBisher < tree->besteTour) {
+				aktuellerNode.nachfolger.push_back(&n);
+				//Branching
+				BranchAndBound(n, tree);
+			}
+			else {
+				n.kill = true;
+				aktuellerNode.nachfolger.push_back(&n);
+			}
+			
 		}
 		else if (iter->getRechts().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
 			aktuellerNode.besuchteKnoten->at(iter->getLinks().getKnotenNummer()) == false) {
@@ -611,10 +618,16 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*
 			Node n = Node(kosten, iter->getLinks(), copy);
 			n.genutzteKanten = aktuellerNode.genutzteKanten;
 			n.genutzteKanten.push_back(*iter);
-			aktuellerNode.nachfolger.push_back(&n);
 
-			//Branching
-			BranchAndBound(n, tree);
+			if (bound && n.kostenBisher < tree->besteTour) {
+				aktuellerNode.nachfolger.push_back(&n);
+				//Branching
+				BranchAndBound(n, tree);
+			}
+			else {
+				n.kill = true;
+				aktuellerNode.nachfolger.push_back(&n);
+			}
 		}
 	}
 
@@ -643,6 +656,7 @@ vector<Kante> Graph::BranchAndBoundTSP()
 	cout << "Kosten: " << tree.besteTour << endl;
 	clock_t ende = clock();
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+
 	return tree.tour;
 }
 
@@ -661,10 +675,19 @@ vector<Kante> Graph::TSPAusprobieren()
 
 vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 {
+	if (startKnoten > knotenListe.size() - 1) {
+		throw exception("Startknoten existiert nicht!");
+	}
+
+	clock_t anfang = clock();
+
+	//min spannbaum mit prim => eulertour moeglich, die genau
+	//in der reihenfolge der Kantenliste die Knoten abarbeitet
 	vector<Kante> mstVec = PrimMST(startKnoten);
 	deque<Kante> mst = deque<Kante>();
 	for (int i = 0; i < mstVec.size(); i++) {
 		mst.push_back(mstVec[i]);
+
 	}
 
 	vector<Kante> tspTour = vector<Kante>();
@@ -676,6 +699,8 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 	besucht[startKnoten] = true;
 	int aktuellerKnoten = startKnoten;
 	double kosten = 0.0;
+
+
 	while (!mst.empty()) {
 		Kante k = mst[0];
 
@@ -692,14 +717,46 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 
 			kosten += k.getGewicht();
 			besucht[k.getLinks().getKnotenNummer()] = true;
-			aktuellerKnoten = k.getRechts().getKnotenNummer();
+			aktuellerKnoten = k.getLinks().getKnotenNummer();
 		}
 		else {//aktueller Knoten nicht in mst => abkuerzung
 			if (besucht[k.getLinks().getKnotenNummer()] == false) {
-				k = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getLinks().getKnotenNummer());
+
+				Kante kurz = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getLinks().getKnotenNummer());
+				mst.pop_front();
+				tspTour.push_back(kurz);
+				kosten += kurz.getGewicht();
+
+				besucht[k.getLinks().getKnotenNummer()] = true;
+				aktuellerKnoten = k.getLinks().getKnotenNummer();
+
+			}else if (besucht[k.getRechts().getKnotenNummer()] == false) {
+
+				Kante kurz = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getRechts().getKnotenNummer());
+				mst.pop_front();
+				tspTour.push_back(kurz);
+				kosten += kurz.getGewicht();
+
+				besucht[k.getRechts().getKnotenNummer()] = true;
+				aktuellerKnoten = k.getRechts().getKnotenNummer();
 			}
 		}
 	}
 
-	return vector<Kante>();
+	if (aktuellerKnoten = tspTour.back().getLinks().getKnotenNummer()) {
+		Kante k = tspTour.back().getLinks().getGuenstigsteKantezuKnoten(startKnoten);
+		tspTour.push_back(k);
+		kosten += k.getGewicht();
+	}
+	else if (aktuellerKnoten = tspTour.back().getRechts().getKnotenNummer()) {
+		Kante k = tspTour.back().getRechts().getGuenstigsteKantezuKnoten(startKnoten);
+		tspTour.push_back(k);
+		kosten += k.getGewicht();
+	}
+
+	cout << "Kosten: " << kosten << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+
+	return tspTour;
 }

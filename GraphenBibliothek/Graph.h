@@ -5,7 +5,7 @@
 #include <string>
 #include "DisjointedSetKnoten.h"
 #include "BranchAndBoundTree.h"
-
+#include <queue>
 using namespace std;
 
 class Graph {
@@ -52,6 +52,7 @@ public:
 	vector<Kante> NearestNeighborTSP(int);
 	void ReduceMatrix(shared_ptr<vector<vector<double>>>&, double&);
 	void BranchAndBound(Node, BABTree*, bool bound=true);
+
 	vector<Kante> BranchAndBoundTSP();
 	vector<Kante> TSPAusprobieren();
 	vector<Kante> DoppelterBaumTSP(int);
