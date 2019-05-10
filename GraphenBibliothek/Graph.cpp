@@ -703,7 +703,7 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 
 	while (!mst.empty()) {
 		Kante k = mst[0];
-
+		//Kante kann aus mst genommen werden
 		if (k.getLinks().getKnotenNummer() == aktuellerKnoten && besucht[k.getRechts().getKnotenNummer()] == false) {
 			tspTour.push_back(k);
 			mst.pop_front();
@@ -758,5 +758,19 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 	clock_t ende = clock();
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
 
+	//augabe:
+	aktuellerKnoten = startKnoten;
+	cout << startKnoten;
+	vector<Kante>::iterator iterErgeb = tspTour.begin();
+	for (; iterErgeb != tspTour.end(); ++iterErgeb) {
+		if (iterErgeb->getLinks().getKnotenNummer() == aktuellerKnoten) {
+			aktuellerKnoten = iterErgeb->getRechts().getKnotenNummer();
+		}
+		else {
+			aktuellerKnoten = iterErgeb->getLinks().getKnotenNummer();
+		}
+		cout << " -> " << aktuellerKnoten;
+	}
+	cout << endl;
 	return tspTour;
 }
