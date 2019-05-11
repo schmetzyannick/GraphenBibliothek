@@ -10,7 +10,6 @@ public:
 	vector<Kante> genutzteKanten;
 	Knoten knoten;
 	shared_ptr<vector<bool>> besuchteKnoten;
-	bool kill;
 
 	Node(double, Knoten, shared_ptr<vector<bool>>);
 	Node() {};
@@ -18,7 +17,6 @@ public:
 
 class BABTree {
 public:
-	bool firstTourFound;
 	double besteTour;
 	vector<Kante> tour;
 	Node root;

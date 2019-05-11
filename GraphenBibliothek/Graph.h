@@ -8,6 +8,7 @@
 #include <queue>
 using namespace std;
 
+//einlesen in eine richtung 
 class Graph {
 private:
 	bool gerichtet;

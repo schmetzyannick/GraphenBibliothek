@@ -576,74 +576,65 @@ void Graph::ReduceMatrix(shared_ptr<vector<vector<double>>> &matrix , double &re
 
 void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*/)
 {
-	//schneide ast ab -> bound
-	/*if (bound && tree->firstTourFound && aktuellerNode.kostenBisher > tree->besteTour) {
-		aktuellerNode.kill = true;
-		return; 
-	}*/
-
 	//iteriere ueber anliegende Kanten
-	vector<Kante>::iterator iter = aktuellerNode.knoten.anliegendeKanten->begin();
-	for (; iter != aktuellerNode.knoten.anliegendeKanten->end(); ++iter) {
+	shared_ptr<vector<Kante>> copyAnliegend = aktuellerNode.knoten.getKantenlisteSortet();
+	for (int i = 0; i < copyAnliegend->size(); i++) {
 
-		if (iter->getLinks().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
-			aktuellerNode.besuchteKnoten->at(iter->getRechts().getKnotenNummer()) == false) {
+		if (copyAnliegend->at(i).getLinks().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
+			aktuellerNode.besuchteKnoten->at(copyAnliegend->at(i).getRechts().getKnotenNummer()) == false) {
 			//Kante zu Knoten gefunden, der noch nicht besucht wurde im aktuellen ast
-			double kosten = iter->getGewicht() + aktuellerNode.kostenBisher;
+			double kosten = copyAnliegend->at(i).getGewicht() + aktuellerNode.kostenBisher;
 			shared_ptr<vector<bool>> copy = make_shared<vector<bool>>(*(aktuellerNode.besuchteKnoten));
-			copy->at(iter->getRechts().getKnotenNummer()) = true;
+			copy->at(copyAnliegend->at(i).getRechts().getKnotenNummer()) = true;
 
-			Node n = Node(kosten, iter->getRechts(), copy);
+			Node n = Node(kosten, copyAnliegend->at(i).getRechts(), copy);
 			n.genutzteKanten = aktuellerNode.genutzteKanten;
-			n.genutzteKanten.push_back(*iter);
+			n.genutzteKanten.push_back(copyAnliegend->at(i));
 
-			if (bound && n.kostenBisher < tree->besteTour) {
+			//Bounding
+			if ((bound && n.kostenBisher < tree->besteTour) || !bound) {
 				aktuellerNode.nachfolger.push_back(&n);
 				//Branching
-				BranchAndBound(n, tree);
+				BranchAndBound(n, tree, bound);
 			}
 			else {
-				n.kill = true;
 				aktuellerNode.nachfolger.push_back(&n);
 			}
 			
 		}
-		else if (iter->getRechts().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
-			aktuellerNode.besuchteKnoten->at(iter->getLinks().getKnotenNummer()) == false) {
+		else if (copyAnliegend->at(i).getRechts().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
+			aktuellerNode.besuchteKnoten->at(copyAnliegend->at(i).getLinks().getKnotenNummer()) == false) {
 			//Kante zu Knoten gefunden, der noch nicht besucht wurde im aktuellen ast
-			double kosten = iter->getGewicht() + aktuellerNode.kostenBisher;
+			double kosten = copyAnliegend->at(i).getGewicht() + aktuellerNode.kostenBisher;
 			shared_ptr<vector<bool>> copy = make_shared<vector<bool>>(*(aktuellerNode.besuchteKnoten));
-			copy->at(iter->getLinks().getKnotenNummer()) = true;
+			copy->at(copyAnliegend->at(i).getLinks().getKnotenNummer()) = true;
 
-			Node n = Node(kosten, iter->getLinks(), copy);
+			Node n = Node(kosten, copyAnliegend->at(i).getLinks(), copy);
 			n.genutzteKanten = aktuellerNode.genutzteKanten;
-			n.genutzteKanten.push_back(*iter);
+			n.genutzteKanten.push_back(copyAnliegend->at(i));
 
-			if (bound && n.kostenBisher < tree->besteTour) {
+			//Bounding
+			if ((bound && n.kostenBisher < tree->besteTour) || !bound) {
 				aktuellerNode.nachfolger.push_back(&n);
 				//Branching
-				BranchAndBound(n, tree);
+				BranchAndBound(n, tree, bound);
 			}
 			else {
-				n.kill = true;
 				aktuellerNode.nachfolger.push_back(&n);
 			}
 		}
 	}
 
 	//tour schließen
-	if (aktuellerNode.kill == false && aktuellerNode.nachfolger.empty()) {
+	if (aktuellerNode.nachfolger.empty()) {
 		int nr = tree->root.knoten.getKnotenNummer();
 		Kante k = aktuellerNode.knoten.getGuenstigsteKantezuKnoten(nr);
 		aktuellerNode.genutzteKanten.push_back(k);
 		aktuellerNode.kostenBisher += k.getGewicht();
-	}
-
-	//Leaf Node bzw. aktuelle Tour ist besser als bisherige Tour => beste Tour setzen
-	if (aktuellerNode.kill==false && aktuellerNode.nachfolger.empty() && aktuellerNode.kostenBisher < tree->besteTour) {
-		tree->firstTourFound = true;
-		tree->besteTour = aktuellerNode.kostenBisher;
-		tree->tour = aktuellerNode.genutzteKanten;
+		if (aktuellerNode.kostenBisher < tree->besteTour) {
+			tree->besteTour = aktuellerNode.kostenBisher;
+			tree->tour = aktuellerNode.genutzteKanten;
+		}
 	}
 }
 
@@ -651,7 +642,7 @@ vector<Kante> Graph::BranchAndBoundTSP()
 {
 	clock_t anfang = clock();
 	BABTree tree = BABTree(this->knotenListe[0], this->knotenListe.size());
-	BranchAndBound(tree.root, &tree);
+	BranchAndBound(tree.root, &tree, true);
 
 	cout << "Kosten: " << tree.besteTour << endl;
 	clock_t ende = clock();
@@ -664,7 +655,7 @@ vector<Kante> Graph::TSPAusprobieren()
 {
 	clock_t anfang = clock();
 	BABTree tree = BABTree(this->knotenListe[0], this->knotenListe.size());
-	BranchAndBound(tree.root, &tree);
+	BranchAndBound(tree.root, &tree, false);
 
 	cout << "Kosten: " << tree.besteTour << endl;
 	clock_t ende = clock();
@@ -673,6 +664,7 @@ vector<Kante> Graph::TSPAusprobieren()
 	return vector<Kante>();
 }
 
+//tiefensuche einfacher allgemeiner 
 vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 {
 	if (startKnoten > knotenListe.size() - 1) {

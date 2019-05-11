@@ -5,7 +5,6 @@ Node::Node(double kosten, Knoten k, shared_ptr<vector<bool>> besuchteKnoten)
 	kostenBisher = kosten;
 	knoten = k;
 	nachfolger = vector<Node*>();
-	kill = false;
 	this->besuchteKnoten = make_shared<vector<bool>>(*besuchteKnoten);
 	this->genutzteKanten = vector<Kante>();
 }
@@ -19,5 +18,4 @@ BABTree::BABTree(Knoten k, int size)
 	besuchteKnoten->at(k.getKnotenNummer()) = true;
 	root = Node(0.0, k, besuchteKnoten);
 	besteTour = INFINITY;
-	firstTourFound = false;
 }
