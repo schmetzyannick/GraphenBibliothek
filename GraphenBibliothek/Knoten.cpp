@@ -28,11 +28,22 @@ bool Knoten::isMarked()
 	return this->marked;
 }
 
+//zweiter meber als sortierte liste => weniger Aufwand
 shared_ptr<vector<Kante>> Knoten::getKantenlisteSortet()
 {
 	shared_ptr<vector<Kante>> copyKantenListe = make_shared<vector<Kante>>(*anliegendeKanten);
 	sort(copyKantenListe->begin(), copyKantenListe->end(), KantenVergleichenKleinerAls());
 	return copyKantenListe;
+}
+
+vector<Kante> Knoten::getKantenlisteSortetNonPtr()
+{
+	vector<Kante> copy = vector<Kante>();
+	for (int i = 0; i < anliegendeKanten->size(); i++) {
+		copy.push_back(anliegendeKanten->at(i));
+	}
+	sort(copy.begin(), copy.end(), KantenVergleichenKleinerAls());
+	return copy;
 }
 
 Kante Knoten::getGuenstigsteKante()

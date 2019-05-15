@@ -574,6 +574,7 @@ void Graph::ReduceMatrix(shared_ptr<vector<vector<double>>> &matrix , double &re
 	}
 }
 
+//int anzahl bes. knoten
 void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*/)
 {
 	//iteriere ueber anliegende Kanten
@@ -592,6 +593,7 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*
 			n.genutzteKanten.push_back(copyAnliegend->at(i));
 
 			//Bounding
+			//direkt nach kostenberechnung => Node muss nicht berechnet / erzeugt werden.
 			if ((bound && n.kostenBisher < tree->besteTour) || !bound) {
 				aktuellerNode.nachfolger.push_back(&n);
 				//Branching
@@ -623,7 +625,7 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*
 				aktuellerNode.nachfolger.push_back(&n);
 			}
 		}
-	}
+	}//end for
 
 	//tour schlieﬂen
 	if (aktuellerNode.nachfolger.empty()) {

@@ -9,6 +9,7 @@ public:
 	vector<Node*> nachfolger;
 	vector<Kante> genutzteKanten;
 	Knoten knoten;
+	//besser in rekursiven aufruf von bandb verschieben => weniger Aufwand
 	shared_ptr<vector<bool>> besuchteKnoten;
 
 	Node(double, Knoten, shared_ptr<vector<bool>>);
@@ -18,6 +19,7 @@ public:
 class BABTree {
 public:
 	double besteTour;
+	//beste tour
 	vector<Kante> tour;
 	Node root;
 

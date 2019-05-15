@@ -20,6 +20,7 @@ public:
 	int getKnotenNummer();
 	bool isMarked();
 	shared_ptr<vector<Kante>> getKantenlisteSortet();
+	vector<Kante> getKantenlisteSortetNonPtr();
 	Kante getGuenstigsteKante();
 	Kante getGuenstigsteKantezuKnoten(int);
 
