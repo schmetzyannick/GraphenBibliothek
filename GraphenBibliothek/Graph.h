@@ -8,6 +8,21 @@
 #include <queue>
 using namespace std;
 
+class KWBNode {
+public:
+	double distanz;
+	int knotenNr;
+	int vorgaenger;
+
+	KWBNode(int nr) { distanz = INFINITY, knotenNr = nr; vorgaenger = NULL; }
+	KWBNode(int nr, double dis) { distanz = dis, knotenNr = nr; vorgaenger = nr; }
+
+	int operator() (const KWBNode& p1, const KWBNode& p2)
+	{
+		return p1.distanz < p2.distanz;
+	}
+};
+
 //einlesen in eine richtung 
 class Graph {
 private:
@@ -57,4 +72,8 @@ public:
 	vector<Kante> BranchAndBoundTSP();
 	vector<Kante> TSPAusprobieren();
 	vector<Kante> DoppelterBaumTSP(int);
+
+	//P4
+	vector<KWBNode> Dijkstra(int);
+	vector<Kante> STPDijkstra(int, int, double &kosten);
 };

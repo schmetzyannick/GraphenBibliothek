@@ -768,3 +768,56 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 	cout << endl;
 	return tspTour;
 }
+
+vector<KWBNode>Graph::Dijkstra(int start)
+{
+	vector<KWBNode> kwbNodes = vector<KWBNode>();
+	priority_queue<KWBNode*, vector<KWBNode*>, greater<KWBNode*>> nichtBetrachtet = priority_queue<KWBNode*, vector<KWBNode*>, greater<KWBNode*>>();
+
+	for (int i = 0; i < this->knotenListe.size(); i++) {
+		if (i == start) {
+			kwbNodes.push_back(KWBNode(i, 0.0));
+			nichtBetrachtet.push(&kwbNodes[i]);
+		}
+		else {
+			kwbNodes.push_back(KWBNode(i));
+			nichtBetrachtet.push(&kwbNodes[i]);
+		}
+	}
+	
+
+	while (!nichtBetrachtet.empty() && nichtBetrachtet.top()->distanz < INFINITY) {
+		KWBNode *k = nichtBetrachtet.top();
+		vector<Kante> anliegendeKanten = knotenListe[k->knotenNr].getKantenlisteSortetNonPtr();
+		vector<Kante>::iterator iter = anliegendeKanten.begin();
+
+		for (; iter != anliegendeKanten.end(); ++iter) {
+			if (iter->getLinks().getKnotenNummer() == k->knotenNr) {
+				if (k->distanz + iter->getGewicht() < kwbNodes[iter->getRechts().getKnotenNummer()].distanz) {
+					kwbNodes[iter->getRechts().getKnotenNummer()].distanz = k->distanz + iter->getGewicht();
+					kwbNodes[iter->getRechts().getKnotenNummer()].vorgaenger = k->knotenNr;
+				}
+			}
+			else {
+				if (k->distanz + iter->getGewicht() < kwbNodes[iter->getLinks().getKnotenNummer()].distanz) {
+					kwbNodes[iter->getLinks().getKnotenNummer()].distanz = k->distanz + iter->getGewicht();
+					kwbNodes[iter->getLinks().getKnotenNummer()].vorgaenger = k->knotenNr;
+				}
+			}
+		}
+
+		nichtBetrachtet.pop();
+	}
+
+	return kwbNodes;
+}
+
+vector<Kante> Graph::STPDijkstra(int start, int ende, double &kosten)
+{
+	//KWB errechnen
+	vector<KWBNode> kwb = Dijkstra(start);
+
+	//Dann auf kwb den web suchen
+
+	return vector<Kante>();
+}
