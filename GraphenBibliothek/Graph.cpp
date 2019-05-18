@@ -42,6 +42,117 @@ vector<Knoten> Graph::getKnotenListe()
 	return this->knotenListe;
 }
 
+//nicht genutzt, kann für alternative B&B impl. genutzt werden
+shared_ptr<vector<vector<double>>> Graph::buildAdjaMatrix()
+{
+	shared_ptr<vector<vector<double>>> adjaMatrix = make_shared<vector<vector<double>>>();
+
+	if (!this->gewichtet) {
+		if (!this->gerichtet) {//ungewichtet ungerichtet
+			for (int i = 0; i < this->knotenListe.size(); i++) {
+				Knoten k = knotenListe[i];
+				vector<double> nachbarn = vector<double>();
+
+				for (int j = 0; j < this->knotenListe.size(); j++) {
+					if (j == i)
+						nachbarn.push_back(INFINITY);
+					else
+						nachbarn.push_back(0);
+				}
+
+				vector<Kante>::iterator iter;
+				for (iter=k.anliegendeKanten->begin();
+					iter!=k.anliegendeKanten->end(); ++iter) {
+
+					if (iter->getLinks().getKnotenNummer() == k.getKnotenNummer()) {
+						nachbarn[iter->getRechts().getKnotenNummer()] = 1;
+					}
+					else if (iter->getRechts().getKnotenNummer() == k.getKnotenNummer()) {
+						nachbarn[iter->getLinks().getKnotenNummer()] = 1;
+					}
+				}
+				adjaMatrix->push_back(nachbarn);
+			}
+		}
+		else {//ungewichtet gerichtet
+			for (int i = 0; i < this->knotenListe.size(); i++) {
+				Knoten k = knotenListe[i];
+				vector<double> nachbarn = vector<double>();
+
+				for (int j = 0; j < this->knotenListe.size(); j++) {
+					if (j == i)
+						nachbarn.push_back(INFINITY);
+					else
+						nachbarn.push_back(0);
+				}
+
+				vector<Kante>::iterator iter;
+				for (iter = k.anliegendeKanten->begin();
+					iter != k.anliegendeKanten->end(); ++iter) {
+
+					if (iter->getLinks().getKnotenNummer() == k.getKnotenNummer()) {
+						nachbarn[iter->getRechts().getKnotenNummer()] = 1;
+					}
+				}
+				adjaMatrix->push_back(nachbarn);
+			}
+		}
+	}
+	else {
+		if (!this->gerichtet) {//gewichtet ungerichtet
+			for (int i = 0; i < this->knotenListe.size(); i++) {
+				Knoten k = knotenListe[i];
+				vector<double> nachbarn = vector<double>();
+
+				for (int j = 0; j < this->knotenListe.size(); j++) {
+					if (j == i)
+						nachbarn.push_back(INFINITY);
+					else
+						nachbarn.push_back(0);
+				}
+
+				vector<Kante>::iterator iter;
+				for (iter = k.anliegendeKanten->begin();
+					iter != k.anliegendeKanten->end(); ++iter) {
+
+					if (iter->getLinks().getKnotenNummer() == k.getKnotenNummer()) {
+						nachbarn[iter->getRechts().getKnotenNummer()] = iter->getGewicht();
+					}
+					else if (iter->getRechts().getKnotenNummer() == k.getKnotenNummer()) {
+						nachbarn[iter->getLinks().getKnotenNummer()] = iter->getGewicht();
+					}
+				}
+				adjaMatrix->push_back(nachbarn);
+			}
+		}
+		else {//gewichtet gerichtet
+			for (int i = 0; i < this->knotenListe.size(); i++) {
+				Knoten k = knotenListe[i];
+				vector<double> nachbarn = vector<double>();
+
+				for (int j = 0; j < this->knotenListe.size(); j++) {
+					if (j == i)
+						nachbarn.push_back(INFINITY);
+					else
+						nachbarn.push_back(0);
+				}
+
+				vector<Kante>::iterator iter;
+				for (iter = k.anliegendeKanten->begin();
+					iter != k.anliegendeKanten->end(); ++iter) {
+
+					if (iter->getLinks().getKnotenNummer() == k.getKnotenNummer()) {
+						nachbarn[iter->getRechts().getKnotenNummer()] = iter->getGewicht();
+					}
+				}
+				adjaMatrix->push_back(nachbarn);
+			}
+		}
+	}
+
+	return adjaMatrix;
+}
+
 void Graph::setGerichtet(bool gerichtet)
 {
 	this->gerichtet = gerichtet;
@@ -234,7 +345,6 @@ void Graph::sortKantenListe()
 	mergeSort(0, kantenListe.size() - 1);
 }
 
-//Merge Sort
 void Graph::mergeSort(int l, int r)
 {
 	if (l < r) {
@@ -294,7 +404,7 @@ void Graph::merge(int links, int mitte, int rechts)
 	}
 }
 
-vector<Kante> Graph::PrimMST()
+vector<Kante> Graph::PrimMST(int start)
 {
 	clock_t anfang = clock();
 	
@@ -304,7 +414,7 @@ vector<Kante> Graph::PrimMST()
 	//Kanten des mst
 	vector<Kante> mst = vector<Kante>();
 
-	Knoten aktuellerKnoten = knotenListe[0];
+	Knoten aktuellerKnoten = knotenListe[start];
 
 	//hält die bereits besuchten Knoten
 	//Verbesserung: array mit bool stelle = Knotennummer
@@ -347,8 +457,314 @@ vector<Kante> Graph::PrimMST()
 		}
 	}
 
-	cout << "Kosten: " << weight << endl;
+	/*cout << "Kosten: " << weight << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;*/
+	return mst;
+}
+
+vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
+{
+	if (startKnoten > knotenListe.size() - 1) {
+		throw exception("Startknoten existiert nicht!");
+	}
+
+	clock_t anfang = clock();
+
+	//zum markieren der bereits besuchten Knoten
+	deque<int> besuchteKnoten = deque<int>();
+	for (int i = 0; i < knotenListe.size(); i++) {
+		besuchteKnoten.push_back(false);
+	}
+
+	vector<Kante> tour = vector<Kante>();
+	Knoten aktuell = knotenListe[startKnoten];
+	besuchteKnoten[startKnoten] = true;
+
+	double kosten = 0.0;
+	int counter = 1;
+
+	//n-1 Kanten -> danach tour schließen
+	while (counter < knotenListe.size()) {
+		Kante k;
+	
+		shared_ptr<vector<Kante>> anliegendeKantenSorted = aktuell.getKantenlisteSortet();
+		vector<Kante>::iterator iter = anliegendeKantenSorted->begin();
+		//finde die guenstigste Kante zu einem noch nicht besuchten Knoten
+		for (; iter != anliegendeKantenSorted->end(); ++iter) {
+			k = *iter;
+			if ((k.getLinks().getKnotenNummer() == aktuell.getKnotenNummer())
+				&& (besuchteKnoten[k.getRechts().getKnotenNummer()] == false)) {
+
+				tour.push_back(k);
+				kosten += k.getGewicht();
+
+				aktuell = k.getRechts();
+				besuchteKnoten[k.getRechts().getKnotenNummer()] = true;
+
+				break;
+			}
+			else if ((k.getRechts().getKnotenNummer() == aktuell.getKnotenNummer())
+				&& (besuchteKnoten[k.getLinks().getKnotenNummer()] == false)) {
+
+				tour.push_back(k);
+				kosten += k.getGewicht();
+
+				aktuell = k.getLinks();
+				besuchteKnoten[k.getLinks().getKnotenNummer()] = true;
+
+				break;
+			}
+		}
+		counter++;
+	}
+
+	//schließe die tour
+	try {
+		Kante k = aktuell.getGuenstigsteKantezuKnoten(startKnoten);
+		kosten += k.getGewicht();
+		tour.push_back(k);
+	}
+	catch (exception e) {
+		throw e;
+	}
+
+	cout << "Kosten: " << kosten << endl;
 	clock_t ende = clock();
 	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
-	return mst;
+	return tour;
+}
+
+//nicht genutzt, kann für alternative B&B impl. genutzt werden
+void Graph::ReduceMatrix(shared_ptr<vector<vector<double>>> &matrix , double &reduktionsKosten)
+{
+	reduktionsKosten = 0.0;
+	//zeilen minimum subtrahieren
+	for (int i = 0; i < matrix->size(); i++) {
+		double min = INFINITY;
+		//minimum finden
+		for (int j = 0; j < matrix->at(i).size(); j++) {
+			if (matrix->at(i).at(j) < min) {
+				min = matrix->at(i).at(j);
+			}
+		}
+
+		//minumum abziehen
+		for (int j = 0; j < matrix->at(i).size(); j++) {
+			matrix->at(i).at(j) -= min;
+		}
+		reduktionsKosten += min;
+	}
+
+	//spalten minimieren
+	for (int i = 0; i < matrix->at(0).size(); i++) {
+		double min = INFINITY;
+
+		for (int j = 0; j < matrix->size(); j++) {
+			if (matrix->at(j).at(i) < min) {
+				min = matrix->at(j).at(i);
+			}
+		}
+
+		//minumum abziehen
+		for (int j = 0; j < matrix->at(i).size(); j++) {
+			matrix->at(j).at(i) -= min;
+		}
+		reduktionsKosten += min;
+	}
+}
+
+//int anzahl bes. knoten
+void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*/)
+{
+	//iteriere ueber anliegende Kanten
+	shared_ptr<vector<Kante>> copyAnliegend = aktuellerNode.knoten.getKantenlisteSortet();
+	for (int i = 0; i < copyAnliegend->size(); i++) {
+
+		if (copyAnliegend->at(i).getLinks().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
+			aktuellerNode.besuchteKnoten->at(copyAnliegend->at(i).getRechts().getKnotenNummer()) == false) {
+			//Kante zu Knoten gefunden, der noch nicht besucht wurde im aktuellen ast
+			double kosten = copyAnliegend->at(i).getGewicht() + aktuellerNode.kostenBisher;
+			shared_ptr<vector<bool>> copy = make_shared<vector<bool>>(*(aktuellerNode.besuchteKnoten));
+			copy->at(copyAnliegend->at(i).getRechts().getKnotenNummer()) = true;
+
+			Node n = Node(kosten, copyAnliegend->at(i).getRechts(), copy);
+			n.genutzteKanten = aktuellerNode.genutzteKanten;
+			n.genutzteKanten.push_back(copyAnliegend->at(i));
+
+			//Bounding
+			//direkt nach kostenberechnung => Node muss nicht berechnet / erzeugt werden.
+			if ((bound && n.kostenBisher < tree->besteTour) || !bound) {
+				aktuellerNode.nachfolger.push_back(&n);
+				//Branching
+				BranchAndBound(n, tree, bound);
+			}
+			else {
+				aktuellerNode.nachfolger.push_back(&n);
+			}
+			
+		}
+		else if (copyAnliegend->at(i).getRechts().getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
+			aktuellerNode.besuchteKnoten->at(copyAnliegend->at(i).getLinks().getKnotenNummer()) == false) {
+			//Kante zu Knoten gefunden, der noch nicht besucht wurde im aktuellen ast
+			double kosten = copyAnliegend->at(i).getGewicht() + aktuellerNode.kostenBisher;
+			shared_ptr<vector<bool>> copy = make_shared<vector<bool>>(*(aktuellerNode.besuchteKnoten));
+			copy->at(copyAnliegend->at(i).getLinks().getKnotenNummer()) = true;
+
+			Node n = Node(kosten, copyAnliegend->at(i).getLinks(), copy);
+			n.genutzteKanten = aktuellerNode.genutzteKanten;
+			n.genutzteKanten.push_back(copyAnliegend->at(i));
+
+			//Bounding
+			if ((bound && n.kostenBisher < tree->besteTour) || !bound) {
+				aktuellerNode.nachfolger.push_back(&n);
+				//Branching
+				BranchAndBound(n, tree, bound);
+			}
+			else {
+				aktuellerNode.nachfolger.push_back(&n);
+			}
+		}
+	}//end for
+
+	//tour schließen
+	if (aktuellerNode.nachfolger.empty()) {
+		int nr = tree->root.knoten.getKnotenNummer();
+		Kante k = aktuellerNode.knoten.getGuenstigsteKantezuKnoten(nr);
+		aktuellerNode.genutzteKanten.push_back(k);
+		aktuellerNode.kostenBisher += k.getGewicht();
+		if (aktuellerNode.kostenBisher < tree->besteTour) {
+			tree->besteTour = aktuellerNode.kostenBisher;
+			tree->tour = aktuellerNode.genutzteKanten;
+		}
+	}
+}
+
+vector<Kante> Graph::BranchAndBoundTSP()
+{
+	clock_t anfang = clock();
+	BABTree tree = BABTree(this->knotenListe[0], this->knotenListe.size());
+	BranchAndBound(tree.root, &tree, true);
+
+	cout << "Kosten: " << tree.besteTour << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+
+	return tree.tour;
+}
+
+vector<Kante> Graph::TSPAusprobieren()
+{
+	clock_t anfang = clock();
+	BABTree tree = BABTree(this->knotenListe[0], this->knotenListe.size());
+	BranchAndBound(tree.root, &tree, false);
+
+	cout << "Kosten: " << tree.besteTour << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+	return tree.tour;
+	return vector<Kante>();
+}
+
+//tiefensuche einfacher allgemeiner 
+vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
+{
+	if (startKnoten > knotenListe.size() - 1) {
+		throw exception("Startknoten existiert nicht!");
+	}
+
+	clock_t anfang = clock();
+
+	//min spannbaum mit prim => eulertour moeglich, die genau
+	//in der reihenfolge der Kantenliste die Knoten abarbeitet
+	vector<Kante> mstVec = PrimMST(startKnoten);
+	deque<Kante> mst = deque<Kante>();
+	for (int i = 0; i < mstVec.size(); i++) {
+		mst.push_back(mstVec[i]);
+
+	}
+
+	vector<Kante> tspTour = vector<Kante>();
+
+	vector<bool> besucht = vector<bool>();
+	for (int i = 0; i < knotenListe.size(); i++) {
+		besucht.push_back(false);
+	}
+	besucht[startKnoten] = true;
+	int aktuellerKnoten = startKnoten;
+	double kosten = 0.0;
+
+
+	while (!mst.empty()) {
+		Kante k = mst[0];
+		//Kante kann aus mst genommen werden
+		if (k.getLinks().getKnotenNummer() == aktuellerKnoten && besucht[k.getRechts().getKnotenNummer()] == false) {
+			tspTour.push_back(k);
+			mst.pop_front();
+
+			kosten += k.getGewicht();
+			besucht[k.getRechts().getKnotenNummer()] = true;
+			aktuellerKnoten = k.getRechts().getKnotenNummer();
+		}else if (k.getRechts().getKnotenNummer() == aktuellerKnoten && besucht[k.getLinks().getKnotenNummer()] == false) {
+			tspTour.push_back(k);
+			mst.pop_front();
+
+			kosten += k.getGewicht();
+			besucht[k.getLinks().getKnotenNummer()] = true;
+			aktuellerKnoten = k.getLinks().getKnotenNummer();
+		}
+		else {//aktueller Knoten nicht in mst => abkuerzung
+			if (besucht[k.getLinks().getKnotenNummer()] == false) {
+
+				Kante kurz = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getLinks().getKnotenNummer());
+				mst.pop_front();
+				tspTour.push_back(kurz);
+				kosten += kurz.getGewicht();
+
+				besucht[k.getLinks().getKnotenNummer()] = true;
+				aktuellerKnoten = k.getLinks().getKnotenNummer();
+
+			}else if (besucht[k.getRechts().getKnotenNummer()] == false) {
+
+				Kante kurz = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getRechts().getKnotenNummer());
+				mst.pop_front();
+				tspTour.push_back(kurz);
+				kosten += kurz.getGewicht();
+
+				besucht[k.getRechts().getKnotenNummer()] = true;
+				aktuellerKnoten = k.getRechts().getKnotenNummer();
+			}
+		}
+	}
+
+	if (aktuellerKnoten = tspTour.back().getLinks().getKnotenNummer()) {
+		Kante k = tspTour.back().getLinks().getGuenstigsteKantezuKnoten(startKnoten);
+		tspTour.push_back(k);
+		kosten += k.getGewicht();
+	}
+	else if (aktuellerKnoten = tspTour.back().getRechts().getKnotenNummer()) {
+		Kante k = tspTour.back().getRechts().getGuenstigsteKantezuKnoten(startKnoten);
+		tspTour.push_back(k);
+		kosten += k.getGewicht();
+	}
+
+	cout << "Kosten: " << kosten << endl;
+	clock_t ende = clock();
+	cout << "Laufzeit: " << ((float)(ende - anfang) / CLOCKS_PER_SEC) << " Sekunden" << endl;
+
+	//augabe:
+	aktuellerKnoten = startKnoten;
+	cout << startKnoten;
+	vector<Kante>::iterator iterErgeb = tspTour.begin();
+	for (; iterErgeb != tspTour.end(); ++iterErgeb) {
+		if (iterErgeb->getLinks().getKnotenNummer() == aktuellerKnoten) {
+			aktuellerKnoten = iterErgeb->getRechts().getKnotenNummer();
+		}
+		else {
+			aktuellerKnoten = iterErgeb->getLinks().getKnotenNummer();
+		}
+		cout << " -> " << aktuellerKnoten;
+	}
+	cout << endl;
+	return tspTour;
 }

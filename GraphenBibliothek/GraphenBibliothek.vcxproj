@@ -117,12 +117,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BranchAndBoundTree.cpp" />
+    <ClCompile Include="DisjointedSetKnoten.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="Kante.cpp" />
     <ClCompile Include="Knoten.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BranchAndBoundTree.h" />
+    <ClInclude Include="DisjointedSetKnoten.h" />
     <ClInclude Include="Graph.h" />
     <ClInclude Include="Kante.h" />
     <ClInclude Include="Knoten.h" />

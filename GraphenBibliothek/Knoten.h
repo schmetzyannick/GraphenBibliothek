@@ -8,7 +8,7 @@ using namespace std;
 class Knoten {
 private:
 	int knotenNummer;
-	bool markBreitensuche;
+	bool marked;
 
 public:
 	shared_ptr<vector<Knoten>> nachbarn;
@@ -19,8 +19,12 @@ public:
 
 	int getKnotenNummer();
 	bool isMarked();
-
+	shared_ptr<vector<Kante>> getKantenlisteSortet();
+	vector<Kante> getKantenlisteSortetNonPtr();
+	Kante getGuenstigsteKante();
+	Kante getGuenstigsteKantezuKnoten(int);
 
 	void markKnoten();
 	void setKnotenNummer(int);
+	
 };
