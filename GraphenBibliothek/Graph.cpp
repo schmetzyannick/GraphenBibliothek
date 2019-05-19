@@ -816,6 +816,68 @@ vector<shared_ptr<KWBNode>>Graph::Dijkstra(int start)
 	return kwbNodes;
 }
 
+vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start)
+{
+	//Schritt1
+	vector<shared_ptr<KWBNode>> kwbNodes = vector<shared_ptr<KWBNode>>();
+	for (int i = 0; i < this->knotenListe.size(); i++) {
+		if (i != start) {
+			shared_ptr<KWBNode> k = make_shared<KWBNode>(i);
+			kwbNodes.push_back(k);
+		}
+		else {
+			shared_ptr<KWBNode> k = make_shared<KWBNode>(start, 0.0);
+			k->vorgaenger = k;
+			kwbNodes.push_back(k);
+		}
+	}
+
+	//Schritt2
+	for (int i = 0; i < knotenListe.size() - 1; i++) {
+		vector<Kante>::iterator iter = this->kantenListe.begin();
+		for (; iter != this->kantenListe.end(); ++iter) {
+
+			if (kwbNodes[iter->getLinks().getKnotenNummer()]->distanz + iter->getGewicht() 
+				< kwbNodes[iter->getRechts().getKnotenNummer()]->distanz) {
+				kwbNodes[iter->getRechts().getKnotenNummer()]->distanz = kwbNodes[iter->getLinks().getKnotenNummer()]->distanz + iter->getGewicht();
+				kwbNodes[iter->getRechts().getKnotenNummer()]->vorgaenger = kwbNodes[iter->getLinks().getKnotenNummer()];
+			}
+
+			if (this->gerichtet == false) {
+				//andersrum betrachten
+				if (kwbNodes[iter->getRechts().getKnotenNummer()]->distanz + iter->getGewicht()
+					< kwbNodes[iter->getLinks().getKnotenNummer()]->distanz) {
+					kwbNodes[iter->getLinks().getKnotenNummer()]->distanz = kwbNodes[iter->getRechts().getKnotenNummer()]->distanz + iter->getGewicht();
+					kwbNodes[iter->getLinks().getKnotenNummer()]->vorgaenger = kwbNodes[iter->getRechts().getKnotenNummer()];
+				}
+			}
+
+		}
+	}
+
+	//Schritt 3
+	vector<Kante>::iterator iter = this->kantenListe.begin();
+	for (; iter != this->kantenListe.end(); ++iter) {
+
+		if (kwbNodes[iter->getLinks().getKnotenNummer()]->distanz + iter->getGewicht()
+			< kwbNodes[iter->getRechts().getKnotenNummer()]->distanz) {
+			kwbNodes.clear();
+			break;
+		}
+
+		if (this->gerichtet == false) {
+			//andersrum betrachten
+			if (kwbNodes[iter->getRechts().getKnotenNummer()]->distanz + iter->getGewicht()
+				< kwbNodes[iter->getLinks().getKnotenNummer()]->distanz) {
+				kwbNodes.clear();
+				break;
+			}
+		}
+
+	}
+	return kwbNodes;
+}
+
 deque<Kante> Graph::DijkstraSTP(int start, int ende, double &kosten)
 {
 	//KWB errechnen
@@ -823,10 +885,12 @@ deque<Kante> Graph::DijkstraSTP(int start, int ende, double &kosten)
 
 	//Dann auf kwb den web suchen
 	kosten = kwb[ende]->distanz;
-
 	deque<Kante> weg = deque<Kante>();
-	
 	shared_ptr<KWBNode> aktuell = kwb[ende];
+
+	if (aktuell->distanz == INFINITY) {
+		return deque<Kante>();
+	}
 
 	while (aktuell != kwb[start]) {
 		Knoten k = this->knotenListe[aktuell->vorgaenger->knotenNr];
@@ -835,5 +899,34 @@ deque<Kante> Graph::DijkstraSTP(int start, int ende, double &kosten)
 	}
 	kosten = kwb[ende]->distanz;
 	return weg;
+}
+
+deque<Kante> Graph::MooreBellmanFordSTP(int start , int ende, double & kosten)
+{
+	//KWB errechnen
+	vector<shared_ptr<KWBNode>> kwb = MooreBellmanFord(start);
+
+	if (kwb.empty()) {
+		kosten = INFINITY;
+		return deque<Kante>();
+	}
+
+	//Dann auf kwb den web suchen
+	kosten = kwb[ende]->distanz;
+	deque<Kante> weg = deque<Kante>();
+	shared_ptr<KWBNode> aktuell = kwb[ende];
+
+	if (aktuell->distanz == INFINITY) {
+		return deque<Kante>();
+	}
+
+	while (aktuell != kwb[start]) {
+		Knoten k = this->knotenListe[aktuell->vorgaenger->knotenNr];
+		weg.push_front(k.getGuenstigsteKantezuKnoten(aktuell->knotenNr));
+		aktuell = kwb[k.getKnotenNummer()];
+	}
+	kosten = kwb[ende]->distanz;
+	return weg;
+	
 }
 

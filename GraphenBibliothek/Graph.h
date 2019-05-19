@@ -83,7 +83,8 @@ public:
 	//P4
 private:
 	vector<shared_ptr<KWBNode>> Dijkstra(int);
-
+	vector<shared_ptr<KWBNode>> MooreBellmanFord(int);
 public:
 	deque<Kante> DijkstraSTP(int, int, double &kosten);
+	deque<Kante> MooreBellmanFordSTP(int, int, double &kosten);
 };

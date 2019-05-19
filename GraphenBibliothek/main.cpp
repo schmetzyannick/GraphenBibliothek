@@ -88,6 +88,9 @@ int main() {
 	//P4
 	double kosten = 0.0;
 	deque<Kante> weg = g.DijkstraSTP(0, 1, kosten);
+
+	double kosten1 = 0.0;
+	deque<Kante> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);
 	system("pause");
 	return 0;
 }
