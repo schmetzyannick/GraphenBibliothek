@@ -769,55 +769,71 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 	return tspTour;
 }
 
-vector<KWBNode>Graph::Dijkstra(int start)
+vector<shared_ptr<KWBNode>>Graph::Dijkstra(int start)
 {
-	vector<KWBNode> kwbNodes = vector<KWBNode>();
-	priority_queue<KWBNode*, vector<KWBNode*>, greater<KWBNode*>> nichtBetrachtet = priority_queue<KWBNode*, vector<KWBNode*>, greater<KWBNode*>>();
+	vector<shared_ptr<KWBNode>> kwbNodes = vector<shared_ptr<KWBNode>>();
+	deque<shared_ptr<KWBNode>> nichtBetrachtet = deque<shared_ptr<KWBNode>>();
+
+	shared_ptr<KWBNode> kstart = make_shared<KWBNode>(start, 0.0);
+	kstart->vorgaenger = kstart;
+	nichtBetrachtet.push_back(kstart);
 
 	for (int i = 0; i < this->knotenListe.size(); i++) {
-		if (i == start) {
-			kwbNodes.push_back(KWBNode(i, 0.0));
-			nichtBetrachtet.push(&kwbNodes[i]);
+		if (i != start) {
+			shared_ptr<KWBNode> k = make_shared<KWBNode>(i);
+			kwbNodes.push_back(k);
+			nichtBetrachtet.push_back(k);
 		}
 		else {
-			kwbNodes.push_back(KWBNode(i));
-			nichtBetrachtet.push(&kwbNodes[i]);
+			kwbNodes.push_back(kstart);
 		}
 	}
 	
 
-	while (!nichtBetrachtet.empty() && nichtBetrachtet.top()->distanz < INFINITY) {
-		KWBNode *k = nichtBetrachtet.top();
-		vector<Kante> anliegendeKanten = knotenListe[k->knotenNr].getKantenlisteSortetNonPtr();
+	while (!nichtBetrachtet.empty() && nichtBetrachtet[0]->distanz < INFINITY) {
+		shared_ptr<KWBNode> k = nichtBetrachtet[0];
+		vector<Kante> anliegendeKanten = this->knotenListe[k->knotenNr].getKantenlisteSortetNonPtr();
 		vector<Kante>::iterator iter = anliegendeKanten.begin();
 
 		for (; iter != anliegendeKanten.end(); ++iter) {
 			if (iter->getLinks().getKnotenNummer() == k->knotenNr) {
-				if (k->distanz + iter->getGewicht() < kwbNodes[iter->getRechts().getKnotenNummer()].distanz) {
-					kwbNodes[iter->getRechts().getKnotenNummer()].distanz = k->distanz + iter->getGewicht();
-					kwbNodes[iter->getRechts().getKnotenNummer()].vorgaenger = k->knotenNr;
+				if (k->distanz + iter->getGewicht() < kwbNodes[iter->getRechts().getKnotenNummer()]->distanz) {
+					kwbNodes[iter->getRechts().getKnotenNummer()]->distanz = k->distanz + iter->getGewicht();
+					kwbNodes[iter->getRechts().getKnotenNummer()]->vorgaenger = k;
 				}
 			}
 			else {
-				if (k->distanz + iter->getGewicht() < kwbNodes[iter->getLinks().getKnotenNummer()].distanz) {
-					kwbNodes[iter->getLinks().getKnotenNummer()].distanz = k->distanz + iter->getGewicht();
-					kwbNodes[iter->getLinks().getKnotenNummer()].vorgaenger = k->knotenNr;
+				if (k->distanz + iter->getGewicht() < kwbNodes[iter->getLinks().getKnotenNummer()]->distanz) {
+					kwbNodes[iter->getLinks().getKnotenNummer()]->distanz = k->distanz + iter->getGewicht();
+					kwbNodes[iter->getLinks().getKnotenNummer()]->vorgaenger = k;
 				}
 			}
 		}
-
-		nichtBetrachtet.pop();
+		nichtBetrachtet.pop_front();
+		std::sort(nichtBetrachtet.begin(), nichtBetrachtet.end(), KWBVergleich());
 	}
-
+	
 	return kwbNodes;
 }
 
-vector<Kante> Graph::STPDijkstra(int start, int ende, double &kosten)
+deque<Kante> Graph::DijkstraSTP(int start, int ende, double &kosten)
 {
 	//KWB errechnen
-	vector<KWBNode> kwb = Dijkstra(start);
+	vector<shared_ptr<KWBNode>> kwb = Dijkstra(start);
 
 	//Dann auf kwb den web suchen
+	kosten = kwb[ende]->distanz;
 
-	return vector<Kante>();
+	deque<Kante> weg = deque<Kante>();
+	
+	shared_ptr<KWBNode> aktuell = kwb[ende];
+
+	while (aktuell != kwb[start]) {
+		Knoten k = this->knotenListe[aktuell->vorgaenger->knotenNr];
+		weg.push_front(k.getGuenstigsteKantezuKnoten(aktuell->knotenNr));
+		aktuell = kwb[k.getKnotenNummer()];
+	}
+	kosten = kwb[ende]->distanz;
+	return weg;
 }
+

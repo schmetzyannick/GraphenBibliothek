@@ -82,9 +82,12 @@ int main() {
 		cout << e.what() << endl;
 	}*/
 
-	vector<Kante> tour = g.BranchAndBoundTSP();
-	vector<Kante> alle = g.TSPAusprobieren();
+	/*vector<Kante> tour = g.BranchAndBoundTSP();
+	vector<Kante> alle = g.TSPAusprobieren();*/
 	
+	//P4
+	double kosten = 0.0;
+	deque<Kante> weg = g.DijkstraSTP(0, 1, kosten);
 	system("pause");
 	return 0;
 }

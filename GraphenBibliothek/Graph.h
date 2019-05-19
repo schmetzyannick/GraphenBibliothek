@@ -12,14 +12,17 @@ class KWBNode {
 public:
 	double distanz;
 	int knotenNr;
-	int vorgaenger;
+	shared_ptr<KWBNode> vorgaenger;
 
-	KWBNode(int nr) { distanz = INFINITY, knotenNr = nr; vorgaenger = NULL; }
-	KWBNode(int nr, double dis) { distanz = dis, knotenNr = nr; vorgaenger = nr; }
+	KWBNode(int nr) { distanz = INFINITY, knotenNr = nr; vorgaenger = nullptr; }
+	KWBNode(int nr, double dis) { distanz = dis, knotenNr = nr; vorgaenger = nullptr; }
+};
 
-	int operator() (const KWBNode& p1, const KWBNode& p2)
+class KWBVergleich {
+public:
+	int operator() (const shared_ptr<KWBNode> p1, const shared_ptr<KWBNode> p2)
 	{
-		return p1.distanz < p2.distanz;
+		return p1->distanz < p2->distanz;
 	}
 };
 
@@ -57,23 +60,30 @@ public:
 	int Zusammenhangskomponenten();
 
 	//P2: MST
-	shared_ptr<vector<Kante>> KruskalMST();
-	void sortKantenListe();
+private:
 	void mergeSort(int l, int r);
 	void merge(int links, int mitte, int rechts);
+	void sortKantenListe();
 
+public:
+	shared_ptr<vector<Kante>> KruskalMST();
 	vector<Kante> PrimMST(int start);
 
 	//P3: TSP
-	vector<Kante> NearestNeighborTSP(int);
+private:
 	void ReduceMatrix(shared_ptr<vector<vector<double>>>&, double&);
 	void BranchAndBound(Node, BABTree*, bool bound=true);
 
+public:
+	vector<Kante> NearestNeighborTSP(int);
 	vector<Kante> BranchAndBoundTSP();
 	vector<Kante> TSPAusprobieren();
 	vector<Kante> DoppelterBaumTSP(int);
 
 	//P4
-	vector<KWBNode> Dijkstra(int);
-	vector<Kante> STPDijkstra(int, int, double &kosten);
+private:
+	vector<shared_ptr<KWBNode>> Dijkstra(int);
+
+public:
+	deque<Kante> DijkstraSTP(int, int, double &kosten);
 };
