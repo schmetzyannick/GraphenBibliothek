@@ -1,2 +1,6 @@
 GraphenBibliothek/Release
 GraphenBibliothek/Debug
+
+Debug/
+Release/
+.vs/
