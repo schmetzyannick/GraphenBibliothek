@@ -23,6 +23,7 @@ public:
 	vector<Kante> getKantenlisteSortetNonPtr();
 	Kante getGuenstigsteKante();
 	Kante getGuenstigsteKantezuKnoten(int);
+	shared_ptr<Kante> getKanteZuKnoten(int);
 
 	void markKnoten();
 	void setKnotenNummer(int);

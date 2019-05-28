@@ -173,7 +173,7 @@ void Graph::setKnotenListe(vector<Knoten> knotenListe)
 	this->knotenListe = knotenListe;
 }
 
-void Graph::GraphFromTextfile()
+void Graph::GraphFromTextfile(bool kapazität)
 {
 	char pfad[4096];
 	cout << "\nBitte geben Sie einen Dateipfad ein: ";
@@ -202,17 +202,31 @@ void Graph::GraphFromTextfile()
 		int links;
 		int rechts;
 		double gewicht;
+		double kapa;
 		//Kantenliste anlegen
 		if (this->gerichtet == false) {
 			if (!gewichtet) {
-				while (datei >> links >> rechts)
-				{
-					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts)));
-					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
-					this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
+				if (!kapazität) {
+					while (datei >> links >> rechts)
+					{
+						kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts)));
+						this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+						this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
 
-					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
-					this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
+						this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+						this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
+					}
+				}
+				else {
+					while (datei >> links >> rechts >> kapa)
+					{
+						kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 0, 0.0, kapa, 0, false));
+						this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+						this->knotenListe.at(rechts).nachbarn->push_back(this->knotenListe.at(links));
+
+						this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+						this->knotenListe.at(rechts).anliegendeKanten->push_back(this->kantenListe.back());
+					}
 				}
 			}
 			else {
@@ -229,11 +243,21 @@ void Graph::GraphFromTextfile()
 		}
 		else {
 			if (!gewichtet) {
-				while (datei >> links >> rechts)
-				{
-					kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1));
-					this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
-					this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+				if (!kapazität) {
+					while (datei >> links >> rechts)
+					{
+						kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1));
+						this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+						this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+					}
+				}
+				else {
+					while (datei >> links >> rechts >> kapa)
+					{
+						kantenListe.push_back(Kante(knotenListe.at(links), knotenListe.at(rechts), 1, 0.0, kapa, 0, false));
+						this->knotenListe.at(links).nachbarn->push_back(this->knotenListe.at(rechts));
+						this->knotenListe.at(links).anliegendeKanten->push_back(this->kantenListe.back());
+					}
 				}
 			}
 			else {
@@ -928,5 +952,112 @@ deque<Kante> Graph::MooreBellmanFordSTP(int start , int ende, double & kosten)
 	kosten = kwb[ende]->distanz;
 	return weg;
 	
+}
+
+bool Graph::bfs(shared_ptr<Graph> g, int s, int t, int *parent)
+{
+	bool *visited = new bool[g->knotenListe.size()];
+	for (int i = 0; i < g->knotenListe.size(); i++) {
+		visited[i] = false;
+	}
+	deque <int> q;
+	q.push_back(s);
+	visited[s] = true;
+	parent[s] = -1;
+	shared_ptr<Kante> k;
+	while (!q.empty())
+	{
+		int u = q.front();
+		q.pop_front();
+
+		for (int v = 0; v < g->knotenListe.size(); v++)
+		{
+			if (visited[v] == false)
+			{	
+				k = g->knotenListe[u].getKanteZuKnoten(v);
+				if (k != nullptr && k->getKapazität() > 0.0) {
+					q.push_back(v);
+					parent[v] = u;
+					visited[v] = true;
+				}
+			}
+		}
+	} 
+	return (visited[t] == true);
+}
+
+deque<shared_ptr<Kante>> Graph::bfs(shared_ptr<Graph> g, int s, int t)
+{
+	int *parent = new int[g->knotenListe.size()];
+	for (int i = 0; i < g->knotenListe.size(); i++) {
+		parent[i] = NULL;
+	}
+
+	this->bfs(g, s, t, parent);
+
+	int vorgaenger = parent[t];
+	if (vorgaenger == NULL) {
+		return deque<shared_ptr<Kante>>();
+	}
+
+	int aktuell = t;
+	deque<shared_ptr<Kante>> weg = deque<shared_ptr<Kante>>();
+	while (vorgaenger != -1) {
+		weg.push_front(knotenListe[vorgaenger].getKanteZuKnoten(aktuell));
+		aktuell = vorgaenger;
+		vorgaenger = parent[aktuell];
+	}
+	return weg;
+}
+
+vector<Kante> Graph::fordFulkerson(int s, int t,double &kosten)
+{
+	shared_ptr<Graph> residualGraph = make_shared<Graph>(*this);
+	int beginResKanten = residualGraph->kantenListe.size();
+	//residualkanten
+	for (int i = 0; i < beginResKanten; i++) {
+		residualGraph->kantenListe.push_back(Kante(residualGraph->kantenListe[i].getRechts(), residualGraph->kantenListe[i].getLinks(), 1, 0.0, 0, 0, true));
+		shared_ptr<Kante> k = make_shared<Kante>(residualGraph->kantenListe[residualGraph->kantenListe.size() - 1]);
+		shared_ptr<Kante> orig = make_shared<Kante>(residualGraph->kantenListe[i]);
+		k->setResidualKante(orig);
+		residualGraph->kantenListe[i].setResidualKante(k);
+	}
+	
+	double flusswert = 0.0;
+	while (true) {
+		double cost;
+		deque<shared_ptr<Kante>> weg = residualGraph->bfs(residualGraph, s, t);
+		if (weg.empty()) {
+			break;
+		}
+
+		double max = INFINITY;
+		for (int i=0; i < weg.size(); i++) {
+			if (max > weg[i]->getKapazität()) {
+				max = weg[i]->getKapazität();
+			}
+		}
+
+		for (int i = 0; i < weg.size(); i++) {
+			if (residualGraph->kantenListe[i].getResidualNatur() == false) {
+				double wert = residualGraph->kantenListe[i].getKapazität() - max;
+				weg[i]->setKapazität(wert);
+				shared_ptr<Kante> res = weg[i]->getResidualKante();
+				wert = res->getKapazität() + max;
+				res->setKapazität(wert);
+			}
+			else {
+				double wert = residualGraph->kantenListe[i].getKapazität() - max;
+				weg[i]->setKapazität(wert);
+				shared_ptr<Kante> orig = weg[i]->getResidualKante();
+				wert = orig->getKapazität() + max;
+				orig->setKapazität(wert);
+			}
+		}
+		
+		flusswert += max;
+	}
+
+	return vector<Kante>();
 }
 

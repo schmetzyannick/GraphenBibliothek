@@ -6,6 +6,7 @@
 #include "DisjointedSetKnoten.h"
 #include "BranchAndBoundTree.h"
 #include <queue>
+#include <map>
 using namespace std;
 
 class KWBNode {
@@ -52,7 +53,7 @@ public:
 	void setKnotenListe(vector<Knoten>);
 
 	//einlesen
-	void GraphFromTextfile();
+	void GraphFromTextfile(bool);
 
 	//P1: Breitensuche
 	inline Knoten ersterUnmarkierter();
@@ -87,4 +88,11 @@ private:
 public:
 	deque<Kante> DijkstraSTP(int, int, double &kosten);
 	deque<Kante> MooreBellmanFordSTP(int, int, double &kosten);
+
+	//P5
+private:
+	bool bfs(shared_ptr<Graph> g, int s, int t, int *parent);
+	deque<shared_ptr<Kante>> bfs(shared_ptr<Graph> g, int s, int t);
+public:
+	vector<Kante> fordFulkerson(int s, int t, double &kosten);
 };

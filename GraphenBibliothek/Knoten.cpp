@@ -71,6 +71,20 @@ Kante Knoten::getGuenstigsteKantezuKnoten(int knoten)
 	return k;
 }
 
+shared_ptr<Kante> Knoten::getKanteZuKnoten(int knoten)
+{
+	shared_ptr<vector<Kante>> sorted = make_shared<vector<Kante>>(*getKantenlisteSortet());
+	shared_ptr<Kante> k= nullptr;
+	vector<Kante>::iterator iter = sorted->begin();
+	for (; iter != sorted->end(); ++iter) {
+		if (iter->getLinks().getKnotenNummer() == knoten || iter->getRechts().getKnotenNummer() == knoten) {
+			shared_ptr<Kante> k = make_shared<Kante>((*iter));
+			return k;
+		}
+	}
+	return k;
+}
+
 void Knoten::setKnotenNummer(int nr)
 {
 	this->knotenNummer = nr;

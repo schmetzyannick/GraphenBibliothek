@@ -41,14 +41,14 @@ int main() {
 	gewichtetInt == 1 ? gewichtet = false : gewichtet = true;
 
 	Graph g = Graph(gerichtet, gewichtet);
-	try {
-		g.GraphFromTextfile();
+	/*try {
+		g.GraphFromTextfile(false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
 		system("pause");
 		return -1;
-	}
+	}*/
 
 	cout << endl << endl << "Graph eingelesen! " << endl;
 	//P1
@@ -86,11 +86,22 @@ int main() {
 	vector<Kante> alle = g.TSPAusprobieren();*/
 	
 	//P4
-	double kosten = 0.0;
+	/*double kosten = 0.0;
 	deque<Kante> weg = g.DijkstraSTP(0, 1, kosten);
 
 	double kosten1 = 0.0;
-	deque<Kante> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);
+	deque<Kante> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);*/
+
+	try {
+		g.GraphFromTextfile(true);
+	}
+	catch (exception e) {
+		cout << e.what() << endl;
+		system("pause");
+		return -1;
+	}
+	double kosten=0.0;
+	g.fordFulkerson(0, 7, kosten);
 	system("pause");
 	return 0;
 }
