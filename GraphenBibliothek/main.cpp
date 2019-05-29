@@ -52,14 +52,14 @@ int main() {
 
 	cout << endl << endl << "Graph eingelesen! " << endl;
 	//P1
-	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
+	/*cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;*/
 
 	//P2
-	/*cout << "\nKruskal: \n";
-	g.KruskalMST();
-	cout << "\nPrim: \n";
-	g.PrimMST();
-	system("pause");*/
+	//cout << "\nKruskal: \n";
+	//g.KruskalMST();
+	//cout << "\nPrim: \n";
+	//g.PrimMST(0);
+	//system("pause");
 
 	//P3
 	/*try {
@@ -70,9 +70,9 @@ int main() {
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
-	}*/
+	}
 	
-	/*try {
+	try {
 		for (int i = 0; i <= g.getKnotenListe().size(); i++) {
 			cout << "start: " << i << endl;
 			g.DoppelterBaumTSP(i);
@@ -80,17 +80,17 @@ int main() {
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
-	}*/
+	}
 
-	/*vector<Kante> tour = g.BranchAndBoundTSP();
+	vector<Kante> tour = g.BranchAndBoundTSP();
 	vector<Kante> alle = g.TSPAusprobieren();*/
 	
 	//P4
 	/*double kosten = 0.0;
-	deque<Kante> weg = g.DijkstraSTP(0, 1, kosten);
+	deque<shared_ptr<Kante>> weg = g.DijkstraSTP(0, 1, kosten);
 
 	double kosten1 = 0.0;
-	deque<Kante> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);*/
+	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);*/
 
 	try {
 		g.GraphFromTextfile(true);

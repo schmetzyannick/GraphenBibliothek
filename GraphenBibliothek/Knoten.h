@@ -11,19 +11,19 @@ private:
 	bool marked;
 
 public:
-	shared_ptr<vector<Knoten>> nachbarn;
-	shared_ptr<vector<Kante>> anliegendeKanten;
+	vector<shared_ptr<Knoten>> nachbarn;
+	vector<shared_ptr<Kante>> anliegendeKanten;
 
 	Knoten();
-	Knoten(int, bool, shared_ptr<vector<Knoten>>, shared_ptr<vector<Kante>>);
+	Knoten(int, bool, vector<shared_ptr<Knoten>>, vector<shared_ptr<Kante>>);
 
 	int getKnotenNummer();
 	bool isMarked();
-	shared_ptr<vector<Kante>> getKantenlisteSortet();
+	vector<shared_ptr<Kante>> getKantenlisteSortet();
 	vector<Kante> getKantenlisteSortetNonPtr();
 	Kante getGuenstigsteKante();
-	Kante getGuenstigsteKantezuKnoten(int);
-	shared_ptr<Kante> getKanteZuKnoten(int);
+	shared_ptr<Kante> getGuenstigsteKantezuKnoten(int);
+	Kante* getKanteZuKnoten(int);
 
 	void markKnoten();
 	void setKnotenNummer(int);

@@ -32,24 +32,23 @@ class Graph {
 private:
 	bool gerichtet;
 	bool gewichtet;
-	vector<Kante> kantenListe;
+	vector<shared_ptr<Kante>> kantenListe;
 	vector<Knoten> knotenListe;
 
 public:
 	Graph(bool, bool);
-	Graph(bool, bool, vector<Kante>, vector<Knoten>);
+	Graph(bool, bool, vector<shared_ptr<Kante>>, vector<Knoten>);
 
 	//getter
 	bool getGerichtet();
 	bool getGewichtet();
-	vector<Kante> getKantenListe();
+	vector<shared_ptr<Kante>> getKantenListe();
 	vector<Knoten> getKnotenListe();
-	shared_ptr<vector<vector<double>>> buildAdjaMatrix();
 
 	//setter
 	void setGerichtet(bool);
 	void setGewichtet(bool);
-	void setKantenListe(vector<Kante>);
+	void setKantenListe(vector<shared_ptr<Kante>>);
 	void setKnotenListe(vector<Knoten>);
 
 	//einlesen
@@ -86,13 +85,14 @@ private:
 	vector<shared_ptr<KWBNode>> Dijkstra(int);
 	vector<shared_ptr<KWBNode>> MooreBellmanFord(int);
 public:
-	deque<Kante> DijkstraSTP(int, int, double &kosten);
-	deque<Kante> MooreBellmanFordSTP(int, int, double &kosten);
+	deque<shared_ptr<Kante>> DijkstraSTP(int, int, double &kosten);
+	deque<shared_ptr<Kante>> MooreBellmanFordSTP(int, int, double &kosten);
 
 	//P5
 private:
 	bool bfs(shared_ptr<Graph> g, int s, int t, int *parent);
 	deque<shared_ptr<Kante>> bfs(shared_ptr<Graph> g, int s, int t);
+	void updateKnotenKanten();
 public:
 	vector<Kante> fordFulkerson(int s, int t, double &kosten);
 };

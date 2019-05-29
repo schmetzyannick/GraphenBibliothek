@@ -10,8 +10,8 @@ enum KantenRichtung
 
 class Kante {
 private:
-	Knoten links;
-	Knoten rechts;
+	Knoten* links;
+	Knoten* rechts;
 	KantenRichtung richtung;
 	double gewicht;
 	double flusswert;
@@ -23,11 +23,11 @@ public:
 	
 
 	Kante();
-	Kante(Knoten, Knoten, int gerichtet=0, double gewichtet=0.0);
-	Kante(Knoten, Knoten, int gerichtet, double gewicht, double kapa, double flussert, bool);
+	Kante(Knoten*, Knoten*, int gerichtet=0, double gewichtet=0.0);
+	Kante(Knoten*, Knoten*, int gerichtet, double gewicht, double kapa, double flussert, bool);
 
-	Knoten getLinks();
-	Knoten getRechts();
+	Knoten* getLinks();
+	Knoten* getRechts();
 	int getRichtung();
 	double getGewicht();
 	double getConstGewicht() const { return this->gewicht; }
@@ -35,8 +35,8 @@ public:
 	bool getResidualNatur();
 	shared_ptr<Kante> getResidualKante();
 
-	void setLinks(Knoten);
-	void setRechts(Knoten);
+	void setLinks(Knoten*);
+	void setRechts(Knoten*);
 	void setRichtung(int);
 	void setGewicht(double);
 	void setKapazität(double);
@@ -67,5 +67,10 @@ public:
 	int operator() (const Kante& p1, const Kante& p2)
 	{
 		return p1.getConstGewicht() < p2.getConstGewicht();
+	}
+
+	int operator() (const shared_ptr<Kante>& p1, const shared_ptr<Kante>& p2)
+	{
+		return p1->getConstGewicht() < p2->getConstGewicht();
 	}
 };
