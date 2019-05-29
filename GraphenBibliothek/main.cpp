@@ -41,25 +41,25 @@ int main() {
 	gewichtetInt == 1 ? gewichtet = false : gewichtet = true;
 
 	Graph g = Graph(gerichtet, gewichtet);
-	/*try {
+	try {
 		g.GraphFromTextfile(false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
 		system("pause");
 		return -1;
-	}*/
+	}
 
 	cout << endl << endl << "Graph eingelesen! " << endl;
 	//P1
-	/*cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;*/
+	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
 
 	//P2
-	//cout << "\nKruskal: \n";
-	//g.KruskalMST();
-	//cout << "\nPrim: \n";
-	//g.PrimMST(0);
-	//system("pause");
+	/*cout << "\nKruskal: \n";
+	g.KruskalMST();
+	cout << "\nPrim: \n";
+	g.PrimMST(0);
+	system("pause");*/
 
 	//P3
 	/*try {
@@ -88,9 +88,10 @@ int main() {
 	//P4
 	/*double kosten = 0.0;
 	deque<shared_ptr<Kante>> weg = g.DijkstraSTP(0, 1, kosten);
-
+	cout << kosten << endl;
 	double kosten1 = 0.0;
-	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);*/
+	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);
+	cout << kosten1 << endl;*/
 
 	try {
 		g.GraphFromTextfile(true);
@@ -102,6 +103,7 @@ int main() {
 	}
 	double kosten=0.0;
 	g.fordFulkerson(0, 7, kosten);
+
 	system("pause");
 	return 0;
 }

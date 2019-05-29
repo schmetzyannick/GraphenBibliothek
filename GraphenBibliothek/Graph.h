@@ -55,7 +55,6 @@ public:
 	void GraphFromTextfile(bool);
 
 	//P1: Breitensuche
-	inline Knoten ersterUnmarkierter();
 	inline void Breitensuche(int start);
 	int Zusammenhangskomponenten();
 
