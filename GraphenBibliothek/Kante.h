@@ -34,6 +34,7 @@ public:
 	double getKapazität();
 	bool getResidualNatur();
 	shared_ptr<Kante> getResidualKante();
+	double getFlusswert();
 
 	void setLinks(Knoten*);
 	void setRechts(Knoten*);
@@ -41,6 +42,7 @@ public:
 	void setGewicht(double);
 	void setKapazität(double);
 	void setResidualKante(shared_ptr<Kante>);
+	void setFlusswert(double fluss);
 
 };
 

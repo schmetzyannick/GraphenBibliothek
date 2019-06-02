@@ -41,16 +41,16 @@ int main() {
 	gewichtetInt == 1 ? gewichtet = false : gewichtet = true;
 
 	Graph g = Graph(gerichtet, gewichtet);
-	try {
+	/*try {
 		g.GraphFromTextfile(false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
 		system("pause");
 		return -1;
-	}
+	}*/
 
-	cout << endl << endl << "Graph eingelesen! " << endl;
+	/*cout << endl << endl << "Graph eingelesen! " << endl;*/
 	//P1
 	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
 

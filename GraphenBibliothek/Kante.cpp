@@ -78,6 +78,11 @@ shared_ptr<Kante> Kante::getResidualKante()
 	return this->residualKante;
 }
 
+double Kante::getFlusswert()
+{
+	return this->flusswert;
+}
+
 void Kante::setLinks(Knoten* l)
 {
 	this->links = l;
@@ -111,4 +116,9 @@ void Kante::setKapazität(double kapa)
 void Kante::setResidualKante(shared_ptr<Kante> k)
 {
 	this->residualKante = k;
+}
+
+void Kante::setFlusswert(double fluss)
+{
+	this->flusswert = fluss;
 }

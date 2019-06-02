@@ -70,7 +70,6 @@ public:
 
 	//P3: TSP
 private:
-	void ReduceMatrix(shared_ptr<vector<vector<double>>>&, double&);
 	void BranchAndBound(Node, BABTree*, bool bound=true);
 
 public:
@@ -93,5 +92,5 @@ private:
 	deque<shared_ptr<Kante>> bfs(shared_ptr<Graph> g, int s, int t);
 	void updateKnotenKanten();
 public:
-	vector<Kante> fordFulkerson(int s, int t, double &kosten);
+	vector<shared_ptr<Kante>> fordFulkerson(int s, int t, double &kosten);
 };
