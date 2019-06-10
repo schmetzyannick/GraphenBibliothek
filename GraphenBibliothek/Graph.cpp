@@ -870,6 +870,7 @@ vector<shared_ptr<Kante>> Graph::fordFulkerson(int s, int t, double &kosten)
 	shared_ptr<Graph> residualGraph = make_shared<Graph>(*this);
 	int beginResKanten = residualGraph->kantenListe.size();
 	//residualkanten
+	//in methode und dann auch in den knoten einfuegen
 	for (int i = 0; i < beginResKanten; i++) {
 		residualGraph->kantenListe.push_back(make_shared<Kante>(residualGraph->kantenListe[i]->getRechts(), residualGraph->kantenListe[i]->getLinks(), 1, 0.0, 0, 0, true));
 		shared_ptr<Kante> k = shared_ptr<Kante>(((residualGraph->kantenListe[residualGraph->kantenListe.size() - 1])));
