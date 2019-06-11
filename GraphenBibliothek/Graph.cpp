@@ -11,10 +11,10 @@ Graph::Graph(bool gerichtet, bool gewichtet)
 	this->gerichtet = gerichtet;
 	this->gewichtet = gewichtet;
 	this->kantenListe = vector<shared_ptr<Kante>>();
-	this->knotenListe = vector<Knoten>();
+	this->knotenListe = vector<shared_ptr<Knoten>>();
 }
 
-Graph::Graph(bool gerichtet, bool gewichtet, vector<shared_ptr<Kante>> kantenListe, vector<Knoten> knotenListe)
+Graph::Graph(bool gerichtet, bool gewichtet, vector<shared_ptr<Kante>> kantenListe, vector<shared_ptr<Knoten>> knotenListe)
 {
 	this->gerichtet = gerichtet;
 	this->gewichtet = gewichtet;
@@ -37,7 +37,7 @@ vector<shared_ptr<Kante>> Graph::getKantenListe()
 	return this->kantenListe;
 }
 
-vector<Knoten> Graph::getKnotenListe()
+vector<shared_ptr<Knoten>> Graph::getKnotenListe()
 {
 	return this->knotenListe;
 }
@@ -57,12 +57,12 @@ void Graph::setKantenListe(vector<shared_ptr<Kante>> kantenListe)
 	this->kantenListe = kantenListe;
 }
 
-void Graph::setKnotenListe(vector<Knoten> knotenListe)
+void Graph::setKnotenListe(vector<shared_ptr<Knoten>> knotenListe)
 {
 	this->knotenListe = knotenListe;
 }
 
-void Graph::GraphFromTextfile(bool kapazität)
+void Graph::GraphFromTextfile(bool kapazität, bool balancen)
 {
 	char pfad[4096];
 	cout << "\nBitte geben Sie einen Dateipfad ein: ";
@@ -80,12 +80,20 @@ void Graph::GraphFromTextfile(bool kapazität)
 
 	//Knotenanzahl ermitteln
 	int anzahlKnoten = -1;
+	double balance;
 	try {
 		datei >> anzahlKnoten;
 		for (int i = 0; i < anzahlKnoten; i++) {
 			vector<shared_ptr<Knoten>> nachbarn = vector<shared_ptr<Knoten>>();
 			vector<shared_ptr<Kante>> anliegend = vector<shared_ptr<Kante>>();
-			this->knotenListe.push_back(Knoten(i, false, nachbarn, anliegend));
+			this->knotenListe.push_back(make_shared<Knoten>(i, false, nachbarn, anliegend));
+		}
+
+		if (balancen) {
+			for (int i = 0; i < anzahlKnoten; i++) {
+				datei >> balance;
+				knotenListe[i]->setBalance(balance);
+			}
 		}
 
 		int links;
@@ -98,26 +106,26 @@ void Graph::GraphFromTextfile(bool kapazität)
 				if (!kapazität) {
 					while (datei >> links >> rechts)
 					{
-						kantenListe.push_back(make_shared<Kante>(&knotenListe.at(links), &knotenListe.at(rechts)));
-						knotenListe[links].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[rechts]));
-						knotenListe[rechts].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[links]));
+						kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts)));
+						knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
+						knotenListe[rechts]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[links]));
 					}
 				}
 				else {
 					while (datei >> links >> rechts >> kapa)
 					{
-						kantenListe.push_back(make_shared<Kante>(&knotenListe.at(links), &knotenListe.at(rechts), 0, 0.0, kapa, 0, false));
-						knotenListe[links].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[rechts]));
-						knotenListe[rechts].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[links]));
+						kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts), 0, 0.0, kapa, 0, false));
+						knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
+						knotenListe[rechts]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[links]));
 					}
 				}
 			}
 			else {
 				while (datei >> links >> rechts >> gewicht)
 				{
-					kantenListe.push_back(make_shared<Kante>(&knotenListe.at(links), &knotenListe.at(rechts), 0, gewicht));
-					knotenListe[links].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[rechts]));
-					knotenListe[rechts].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[links]));
+					kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts), 0, gewicht));
+					knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
+					knotenListe[rechts]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[links]));
 				}
 			}
 		}
@@ -126,24 +134,34 @@ void Graph::GraphFromTextfile(bool kapazität)
 				if (!kapazität) {
 					while (datei >> links >> rechts)
 					{
-						kantenListe.push_back(make_shared<Kante>(&knotenListe.at(links), &knotenListe.at(rechts), 1));
-						knotenListe[links].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[rechts]));
+						kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts), 1));
+						knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
 					}
 				}
 				else {
 					while (datei >> links >> rechts >> kapa)
 					{
-						kantenListe.push_back(make_shared<Kante>(&knotenListe.at(links), &knotenListe.at(rechts), 1, 0.0, kapa, 0, false));
-						knotenListe[links].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[rechts]));
+						kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts), 1, 0.0, kapa, 0, false));
+						knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
 					}
 				}
 			}
 			else {
-				while (datei >> links >> rechts >> gewicht)
-				{
-					kantenListe.push_back(make_shared<Kante>(&knotenListe.at(links), &knotenListe.at(rechts), 1, gewicht));
-					knotenListe[links].nachbarn.push_back(shared_ptr<Knoten>(&knotenListe[rechts]));
+				if (!kapazität) {
+					while (datei >> links >> rechts >> gewicht)
+					{
+						kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts), 1, gewicht));
+						knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
+					}
 				}
+				else {
+					while (datei >> links >> rechts >> gewicht >> kapa)
+					{
+						kantenListe.push_back(make_shared<Kante>(knotenListe.at(links), knotenListe.at(rechts), 1, gewicht, kapa, 0, false));
+						knotenListe[links]->nachbarn.push_back(shared_ptr<Knoten>(knotenListe[rechts]));
+					}
+				}
+				
 			}
 		}
 		datei.close();
@@ -155,11 +173,11 @@ void Graph::GraphFromTextfile(bool kapazität)
 	vector<shared_ptr<Kante>>::iterator iterKante = this->kantenListe.begin();
 	for (; iterKante != kantenListe.end(); ++iterKante) {
 		if (gerichtet) {
-			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()].anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
+			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
 		}
 		else {
-			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()].anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
-			knotenListe[(*iterKante)->getRechts()->getKnotenNummer()].anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
+			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
+			knotenListe[(*iterKante)->getRechts()->getKnotenNummer()]->anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
 		}
 	}
 	return;
@@ -167,17 +185,17 @@ void Graph::GraphFromTextfile(bool kapazität)
 
 inline void Graph::Breitensuche(int start)
 {
-	list<Knoten> schlange = list<Knoten>();
-	this->knotenListe.at(start).markKnoten();
+	list<shared_ptr<Knoten>> schlange = list<shared_ptr<Knoten>>();
+	this->knotenListe.at(start)->markKnoten();
 	schlange.push_front(this->knotenListe.at(start));
 	while (!schlange.empty()) {
-		int tmp = schlange.front().getKnotenNummer();
+		int tmp = schlange.front()->getKnotenNummer();
 		schlange.pop_front();
-		for (vector<shared_ptr<Knoten>>::iterator iter = knotenListe[tmp].nachbarn.begin();
-			iter != knotenListe[tmp].nachbarn.end(); ++iter) {
+		for (vector<shared_ptr<Knoten>>::iterator iter = knotenListe[tmp]->nachbarn.begin();
+			iter != knotenListe[tmp]->nachbarn.end(); ++iter) {
 			int nr = (*iter)->getKnotenNummer();
-			if (!knotenListe.at(nr).isMarked()) {
-				knotenListe.at(nr).markKnoten();
+			if (!knotenListe.at(nr)->isMarked()) {
+				knotenListe.at(nr)->markKnoten();
 				schlange.push_back(knotenListe.at(nr));
 			}
 		}
@@ -187,14 +205,14 @@ inline void Graph::Breitensuche(int start)
 int Graph::Zusammenhangskomponenten()
 {
 	/*clock_t anfang = clock();*/
-	Knoten naechster = knotenListe[0];
+	shared_ptr<Knoten> naechster = knotenListe[0];
 	int komponenten = 0;
-	for (vector<Knoten>::iterator iter = this->knotenListe.begin();
+	for (vector<shared_ptr<Knoten>>::iterator iter = this->knotenListe.begin();
 		iter != this->knotenListe.end(); ++iter) {
 
-		if (!iter->isMarked()) {
+		if (!(*iter)->isMarked()) {
 			komponenten++;
-			Breitensuche(iter->getKnotenNummer());
+			Breitensuche((*iter)->getKnotenNummer());
 		}
 	}
 	//clock_t ende = clock();
@@ -315,12 +333,12 @@ vector<Kante> Graph::PrimMST(int start)
 	//Kanten des mst
 	vector<Kante> mst = vector<Kante>();
 
-	Knoten aktuellerKnoten = knotenListe[start];
+	shared_ptr<Knoten> aktuellerKnoten = knotenListe[start];
 
 	//hält die bereits besuchten Knoten
 	//Verbesserung: array mit bool stelle = Knotennummer
 	set<int> besuchteKnoten = set<int>();
-	besuchteKnoten.insert(aktuellerKnoten.getKnotenNummer());
+	besuchteKnoten.insert(aktuellerKnoten->getKnotenNummer());
 
 	double weight = 0.0;
 	bool addKanten = true;
@@ -330,8 +348,8 @@ vector<Kante> Graph::PrimMST(int start)
 		if (addKanten) {
 			//fuege Kanten des neuen Knoten in die pq
 			//Verbesserung: nur Kanten bei denen nicht beide Knoten besucht sind
-			for (vector<shared_ptr<Kante>>::iterator iterKanten = aktuellerKnoten.anliegendeKanten.begin();
-				iterKanten != aktuellerKnoten.anliegendeKanten.end(); ++iterKanten) {
+			for (vector<shared_ptr<Kante>>::iterator iterKanten = aktuellerKnoten->anliegendeKanten.begin();
+				iterKanten != aktuellerKnoten->anliegendeKanten.end(); ++iterKanten) {
 				pq.push(*(*iterKanten));
 			}
 		}
@@ -343,14 +361,14 @@ vector<Kante> Graph::PrimMST(int start)
 			mst.push_back(toInsert);
 			weight += toInsert.getGewicht();
 			besuchteKnoten.insert(toInsert.getLinks()->getKnotenNummer());
-			aktuellerKnoten = *toInsert.getLinks();
+			aktuellerKnoten = toInsert.getLinks();
 			addKanten = true;
 		}//rechter Knoten noch nicht besucht
 		else if(besuchteKnoten.find(toInsert.getRechts()->getKnotenNummer()) == besuchteKnoten.end()){
 			mst.push_back(toInsert);
 			weight += toInsert.getGewicht();
 			besuchteKnoten.insert(toInsert.getRechts()->getKnotenNummer());
-			aktuellerKnoten = *toInsert.getRechts();
+			aktuellerKnoten = toInsert.getRechts();
 			addKanten = true;
 		}//beide Knoten bereits besucht
 		else {
@@ -379,7 +397,7 @@ vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
 	}
 
 	vector<Kante> tour = vector<Kante>();
-	Knoten aktuell = knotenListe[startKnoten];
+	shared_ptr<Knoten> aktuell = knotenListe[startKnoten];
 	besuchteKnoten[startKnoten] = true;
 
 	double kosten = 0.0;
@@ -389,29 +407,29 @@ vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
 	while (counter < knotenListe.size()) {
 		shared_ptr<Kante> k;
 	
-		vector<shared_ptr<Kante>> anliegendeKantenSorted = aktuell.getKantenlisteSortet();
+		vector<shared_ptr<Kante>> anliegendeKantenSorted = aktuell->getKantenlisteSortet();
 		vector<shared_ptr<Kante>>::iterator iter = anliegendeKantenSorted.begin();
 		//finde die guenstigste Kante zu einem noch nicht besuchten Knoten
 		for (; iter != anliegendeKantenSorted.end(); ++iter) {
 			k = *iter;
-			if ((k->getLinks()->getKnotenNummer() == aktuell.getKnotenNummer())
+			if ((k->getLinks()->getKnotenNummer() == aktuell->getKnotenNummer())
 				&& (besuchteKnoten[k->getRechts()->getKnotenNummer()] == false)) {
 
 				tour.push_back(*k);
 				kosten += k->getGewicht();
 
-				aktuell = *k->getRechts();
+				aktuell = k->getRechts();
 				besuchteKnoten[k->getRechts()->getKnotenNummer()] = true;
 
 				break;
 			}
-			else if ((k->getRechts()->getKnotenNummer() == aktuell.getKnotenNummer())
+			else if ((k->getRechts()->getKnotenNummer() == aktuell->getKnotenNummer())
 				&& (besuchteKnoten[k->getLinks()->getKnotenNummer()] == false)) {
 
 				tour.push_back(*k);
 				kosten += k->getGewicht();
 
-				aktuell = *k->getLinks();
+				aktuell = k->getLinks();
 				besuchteKnoten[k->getLinks()->getKnotenNummer()] = true;
 
 				break;
@@ -422,7 +440,7 @@ vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
 
 	//schließe die tour
 	try {
-		shared_ptr<Kante> k = aktuell.getGuenstigsteKantezuKnoten(startKnoten);
+		shared_ptr<Kante> k = aktuell->getGuenstigsteKantezuKnoten(startKnoten);
 		kosten += k->getGewicht();
 		tour.push_back(*k);
 	}
@@ -440,17 +458,17 @@ vector<Kante> Graph::NearestNeighborTSP(int startKnoten)
 void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*/)
 {
 	//iteriere ueber anliegende Kanten
-	vector<shared_ptr<Kante>> copyAnliegend = aktuellerNode.knoten.getKantenlisteSortet();
+	vector<shared_ptr<Kante>> copyAnliegend = aktuellerNode.knoten->getKantenlisteSortet();
 	for (int i = 0; i < copyAnliegend.size(); i++) {
 
-		if (copyAnliegend[i]->getLinks()->getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
+		if (copyAnliegend[i]->getLinks()->getKnotenNummer() == aktuellerNode.knoten->getKnotenNummer() &&
 			aktuellerNode.besuchteKnoten->at(copyAnliegend[i]->getRechts()->getKnotenNummer()) == false) {
 			//Kante zu Knoten gefunden, der noch nicht besucht wurde im aktuellen ast
 			double kosten = copyAnliegend[i]->getGewicht() + aktuellerNode.kostenBisher;
 			shared_ptr<vector<bool>> copy = make_shared<vector<bool>>(*(aktuellerNode.besuchteKnoten));
 			copy->at(copyAnliegend[i]->getRechts()->getKnotenNummer()) = true;
 
-			Node n = Node(kosten, *copyAnliegend[i]->getRechts(), copy);
+			Node n = Node(kosten, copyAnliegend[i]->getRechts(), copy);
 			n.genutzteKanten = aktuellerNode.genutzteKanten;
 			n.genutzteKanten.push_back(*copyAnliegend[i]);
 
@@ -466,14 +484,14 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*
 			}
 			
 		}
-		else if (copyAnliegend[i]->getRechts()->getKnotenNummer() == aktuellerNode.knoten.getKnotenNummer() &&
+		else if (copyAnliegend[i]->getRechts()->getKnotenNummer() == aktuellerNode.knoten->getKnotenNummer() &&
 			aktuellerNode.besuchteKnoten->at(copyAnliegend[i]->getLinks()->getKnotenNummer()) == false) {
 			//Kante zu Knoten gefunden, der noch nicht besucht wurde im aktuellen ast
 			double kosten = copyAnliegend[i]->getGewicht() + aktuellerNode.kostenBisher;
 			shared_ptr<vector<bool>> copy = make_shared<vector<bool>>(*(aktuellerNode.besuchteKnoten));
 			copy->at(copyAnliegend[i]->getLinks()->getKnotenNummer()) = true;
 
-			Node n = Node(kosten, *copyAnliegend[i]->getLinks(), copy);
+			Node n = Node(kosten, copyAnliegend[i]->getLinks(), copy);
 			n.genutzteKanten = aktuellerNode.genutzteKanten;
 			n.genutzteKanten.push_back(*copyAnliegend[i]);
 
@@ -491,8 +509,8 @@ void Graph::BranchAndBound(Node aktuellerNode, BABTree* tree, bool bound/*=true*
 
 	//tour schließen
 	if (aktuellerNode.nachfolger.empty()) {
-		int nr = tree->root.knoten.getKnotenNummer();
-		shared_ptr<Kante> k = aktuellerNode.knoten.getGuenstigsteKantezuKnoten(nr);
+		int nr = tree->root.knoten->getKnotenNummer();
+		shared_ptr<Kante> k = aktuellerNode.knoten->getGuenstigsteKantezuKnoten(nr);
 		aktuellerNode.genutzteKanten.push_back(*k);
 		aktuellerNode.kostenBisher += k->getGewicht();
 		if (aktuellerNode.kostenBisher < tree->besteTour) {
@@ -578,7 +596,7 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 		else {//aktueller Knoten nicht in mst => abkuerzung
 			if (besucht[k.getLinks()->getKnotenNummer()] == false) {
 
-				shared_ptr<Kante> kurz = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getLinks()->getKnotenNummer());
+				shared_ptr<Kante> kurz = knotenListe[aktuellerKnoten]->getGuenstigsteKantezuKnoten(k.getLinks()->getKnotenNummer());
 				mst.pop_front();
 				tspTour.push_back(*kurz);
 				kosten += kurz->getGewicht();
@@ -588,7 +606,7 @@ vector<Kante> Graph::DoppelterBaumTSP(int startKnoten)
 
 			}else if (besucht[k.getRechts()->getKnotenNummer()] == false) {
 
-				shared_ptr<Kante> kurz = knotenListe[aktuellerKnoten].getGuenstigsteKantezuKnoten(k.getRechts()->getKnotenNummer());
+				shared_ptr<Kante> kurz = knotenListe[aktuellerKnoten]->getGuenstigsteKantezuKnoten(k.getRechts()->getKnotenNummer());
 				mst.pop_front();
 				tspTour.push_back(*kurz);
 				kosten += kurz->getGewicht();
@@ -654,7 +672,7 @@ vector<shared_ptr<KWBNode>>Graph::Dijkstra(int start)
 
 	while (!nichtBetrachtet.empty() && nichtBetrachtet[0]->distanz < INFINITY) {
 		shared_ptr<KWBNode> k = nichtBetrachtet[0];
-		vector<shared_ptr<Kante>> anliegendeKanten = this->knotenListe[k->knotenNr].getKantenlisteSortet();
+		vector<shared_ptr<Kante>> anliegendeKanten = this->knotenListe[k->knotenNr]->getKantenlisteSortet();
 		vector<shared_ptr<Kante>>::iterator iter = anliegendeKanten.begin();
 		for (; iter != anliegendeKanten.end(); ++iter) {
 			if ((*iter)->getLinks()->getKnotenNummer() == k->knotenNr) {
@@ -677,7 +695,7 @@ vector<shared_ptr<KWBNode>>Graph::Dijkstra(int start)
 	return kwbNodes;
 }
 
-vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start)
+vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 {
 	//Schritt1
 	vector<shared_ptr<KWBNode>> kwbNodes = vector<shared_ptr<KWBNode>>();
@@ -722,10 +740,28 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start)
 
 		if (kwbNodes[(*iter)->getLinks()->getKnotenNummer()]->distanz + (*iter)->getGewicht()
 			< kwbNodes[(*iter)->getRechts()->getKnotenNummer()]->distanz) {
-			kwbNodes.clear();
-			break;
+			if (findCycle == true) {
+				int i = (*iter)->getLinks()->getKnotenNummer();
+				bool *visited = new bool[knotenListe.size()];
+				for (int j = 0; j < knotenListe.size(); j++) {
+					visited[j] = false;
+				}
+				visited[i] = true;
+				vector<shared_ptr<KWBNode>> kantenCycle = vector<shared_ptr<KWBNode>>();
+				kantenCycle.push_back(kwbNodes[(*iter)->getLinks()->getKnotenNummer()]);
+				while (true) {
+					if (visited[kwbNodes[i]->vorgaenger->knotenNr] == true) { break; }
+					kantenCycle.push_back(kwbNodes[i]->vorgaenger);
+					visited[i] = true;
+					i = kwbNodes[i]->vorgaenger->knotenNr;
+				}
+				return kantenCycle;
+			}
+			else {
+				kwbNodes.clear();
+				break;
+			}
 		}
-
 		if (this->gerichtet == false) {
 			//andersrum betrachten
 			if (kwbNodes[(*iter)->getRechts()->getKnotenNummer()]->distanz + (*iter)->getGewicht()
@@ -735,6 +771,11 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start)
 			}
 		}
 
+	}
+
+	if (findCycle) {
+		kwbNodes.clear();
+		return kwbNodes;
 	}
 	return kwbNodes;
 }
@@ -754,9 +795,9 @@ deque<shared_ptr<Kante>> Graph::DijkstraSTP(int start, int ende, double &kosten)
 	}
 
 	while (aktuell != kwb[start]) {
-		Knoten k = this->knotenListe[aktuell->vorgaenger->knotenNr];
-		weg.push_front(k.getGuenstigsteKantezuKnoten(aktuell->knotenNr));
-		aktuell = kwb[k.getKnotenNummer()];
+		shared_ptr<Knoten> k = this->knotenListe[aktuell->vorgaenger->knotenNr];
+		weg.push_front(k->getGuenstigsteKantezuKnoten(aktuell->knotenNr));
+		aktuell = kwb[k->getKnotenNummer()];
 	}
 	kosten = kwb[ende]->distanz;
 	return weg;
@@ -782,9 +823,9 @@ deque<shared_ptr<Kante>> Graph::MooreBellmanFordSTP(int start , int ende, double
 	}
 
 	while (aktuell != kwb[start]) {
-		Knoten k = this->knotenListe[aktuell->vorgaenger->knotenNr];
-		weg.push_front(k.getGuenstigsteKantezuKnoten(aktuell->knotenNr));
-		aktuell = kwb[k.getKnotenNummer()];
+		shared_ptr<Knoten> k = this->knotenListe[aktuell->vorgaenger->knotenNr];
+		weg.push_front(k->getGuenstigsteKantezuKnoten(aktuell->knotenNr));
+		aktuell = kwb[k->getKnotenNummer()];
 	}
 	kosten = kwb[ende]->distanz;
 	return weg;
@@ -808,8 +849,8 @@ bool Graph::bfs(shared_ptr<Graph> g, int s, int t, int *parent)
 		int u = q.front();
 		q.pop_front();
 
-		vector<shared_ptr<Kante>>::iterator iterNachbarn = knotenListe[u].anliegendeKanten.begin();
-		for(; iterNachbarn != knotenListe[u].anliegendeKanten.end(); ++iterNachbarn)
+		vector<shared_ptr<Kante>>::iterator iterNachbarn = knotenListe[u]->anliegendeKanten.begin();
+		for(; iterNachbarn != knotenListe[u]->anliegendeKanten.end(); ++iterNachbarn)
 		//for (int v = 0; v < g->knotenListe.size(); v++)
 		{
 			if (visited[(*iterNachbarn)->getRechts()->getKnotenNummer()] == false)
@@ -842,7 +883,7 @@ deque<shared_ptr<Kante>> Graph::bfs(shared_ptr<Graph> g, int s, int t)
 	int aktuell = t;
 	deque<shared_ptr<Kante>> weg = deque<shared_ptr<Kante>>();
 	while (vorgaenger != -1) {
-		weg.push_front(knotenListe[vorgaenger].getGuenstigsteKantezuKnoten(aktuell));
+		weg.push_front(knotenListe[vorgaenger]->getGuenstigsteKantezuKnoten(aktuell));
 		aktuell = vorgaenger;
 		vorgaenger = parent[aktuell];
 	}
@@ -856,11 +897,11 @@ void Graph::updateKnotenKanten()
 		if (this->gerichtet) {
 			vector<shared_ptr<Kante>>::iterator iter = kantenListe.begin();
 			for (; iter != this->kantenListe.end(); ++iter) {
-				if ((*iter)->getLinks()->getKnotenNummer() == knotenListe[i].getKnotenNummer()) {
+				if ((*iter)->getLinks()->getKnotenNummer() == knotenListe[i]->getKnotenNummer()) {
 					liste.push_back(shared_ptr<Kante>((*iter)));
 				}
 			}
-			knotenListe[i].anliegendeKanten = liste;
+			this->knotenListe[i]->anliegendeKanten = liste;
 		}
 	}
 }
@@ -914,7 +955,7 @@ vector<shared_ptr<Kante>> Graph::fordFulkerson(int s, int t, double &kosten)
 		
 		flusswert += max;
 	}
-	std::cout << flusswert << endl;
+
 	vector<shared_ptr<Kante>> fluss = vector<shared_ptr<Kante>>();
 	vector<shared_ptr<Kante>>::iterator iterKanten = residualGraph->kantenListe.begin();
 	for (; iterKanten != residualGraph->kantenListe.end(); ++iterKanten) {
@@ -925,5 +966,200 @@ vector<shared_ptr<Kante>> Graph::fordFulkerson(int s, int t, double &kosten)
 			fluss.push_back((*iterKanten)->getResidualKante());
 		}
 	}
+
+	vector<shared_ptr<Kante>>::iterator iterFlussKanten = fluss.begin();
+	vector<shared_ptr<Kante>>::iterator iterGKanten = this->kantenListe.begin();
+	for (; iterFlussKanten != fluss.end(); ++iterFlussKanten) {
+		iterGKanten = this->kantenListe.begin();
+		for (; iterGKanten != this->kantenListe.end(); ++iterGKanten) {
+			if ((*iterGKanten)->getLinks()->getKnotenNummer() == (*iterFlussKanten)->getLinks()->getKnotenNummer()
+				&& (*iterGKanten)->getRechts()->getKnotenNummer() == (*iterFlussKanten)->getRechts()->getKnotenNummer()) {
+				(*iterGKanten)->setFlusswert((*iterFlussKanten)->getFlusswert());
+			}
+		}
+	}
+
+	iterGKanten = this->kantenListe.begin();
+	for (; iterGKanten != this->kantenListe.end(); ++iterGKanten) {
+		(*iterGKanten)->setResidualKante(nullptr);
+	}
+	return fluss;
+}
+
+shared_ptr<Graph> Graph::getResidualgraph()
+{
+	shared_ptr<Graph> res = make_unique<Graph>(*this);
+	vector<shared_ptr<Kante>> kantenOrignalGraph = vector<shared_ptr<Kante>>();
+	vector<shared_ptr<Knoten>> knotenOrignalGraph = vector<shared_ptr<Knoten>>();
+
+	vector<shared_ptr<Kante>>::iterator iter = res->kantenListe.begin();
+	for (; iter != res->kantenListe.end(); ++iter) {
+		kantenOrignalGraph.push_back(make_shared<Kante>(*(*iter)));
+	}
+
+	vector<shared_ptr<Knoten>>::iterator iterKno = res->knotenListe.begin();
+	for (; iterKno != res->knotenListe.end(); ++iterKno) {
+		knotenOrignalGraph.push_back(make_shared<Knoten>(*(*iterKno)));
+	}
+
+	res->kantenListe.clear();
+	res->knotenListe.clear();
+
+	for (int i = 0; i < knotenOrignalGraph.size(); i++) {
+		vector<shared_ptr<Knoten>> nachbarn = vector<shared_ptr<Knoten>>();
+		vector<shared_ptr<Kante>> anliegend = vector<shared_ptr<Kante>>();
+		res->knotenListe.push_back(make_shared<Knoten>(i, false, nachbarn, anliegend));
+		res->knotenListe.back()->setBalance(knotenOrignalGraph[i]->getBalance());
+		res->knotenListe.back()->setAktuelleBalance(knotenOrignalGraph[i]->getAktuelleBalance());
+	}
+
+	vector<shared_ptr<Kante>>::iterator iterKanten = kantenOrignalGraph.begin();
+	for (; iterKanten != kantenOrignalGraph.end(); ++iterKanten) {
+
+		shared_ptr<Kante> vor = make_shared<Kante>((*iterKanten)->getLinks(), (*iterKanten)->getRechts(), 1, (*iterKanten)->getConstGewicht(),
+			((*iterKanten)->getKapazität() - (*iterKanten)->getFlusswert()), 0, false);
+		shared_ptr<Kante> rueck = make_shared<Kante>((*iterKanten)->getRechts(), (*iterKanten)->getLinks(), 1, (-1*(*iterKanten)->getConstGewicht()),
+			((*iterKanten)->getFlusswert()), 0, true);
+
+		if ((*iterKanten)->getFlusswert() == (*iterKanten)->getKapazität()) {
+			res->knotenListe[rueck->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(rueck);
+			res->knotenListe[rueck->getLinks()->getKnotenNummer()]->nachbarn.push_back(res->knotenListe[rueck->getRechts()->getKnotenNummer()]);
+			res->kantenListe.push_back(rueck);
+		}
+		else if ((*iterKanten)->getFlusswert() == 0) {
+			res->knotenListe[vor->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(vor);
+			res->knotenListe[vor->getLinks()->getKnotenNummer()]->nachbarn.push_back(res->knotenListe[vor->getRechts()->getKnotenNummer()]);
+			res->kantenListe.push_back(vor);
+		}
+		else {
+			vor->setResidualKante(rueck);
+			rueck->setResidualKante(vor);
+
+			res->knotenListe[rueck->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(rueck);
+			res->knotenListe[rueck->getLinks()->getKnotenNummer()]->nachbarn.push_back(res->knotenListe[rueck->getRechts()->getKnotenNummer()]);
+			res->kantenListe.push_back(rueck);
+			
+			res->knotenListe[vor->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(vor);
+			res->knotenListe[vor->getLinks()->getKnotenNummer()]->nachbarn.push_back(res->knotenListe[vor->getRechts()->getKnotenNummer()]);
+			res->kantenListe.push_back(vor);
+		}
+	}
+	return res;
+}
+
+vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
+{
+	double k;
+
+	//einführen super quelle und senke für ford fulkerson
+	int superQ = this->knotenListe.size();
+	int superS = this->knotenListe.size()+1;
+	vector<shared_ptr<Knoten>> superQNachbarn = vector<shared_ptr<Knoten>>();
+	vector<shared_ptr<Kante>> superQAnliegend = vector<shared_ptr<Kante>>();
+
+	vector<shared_ptr<Knoten>> superSNachbarn = vector<shared_ptr<Knoten>>();
+	vector<shared_ptr<Kante>> superSAnliegend = vector<shared_ptr<Kante>>();
+
+	this->knotenListe.push_back(make_shared<Knoten>(superQ, false, superQNachbarn, superQAnliegend));
+	this->knotenListe.push_back(make_shared<Knoten>(superS, false, superSNachbarn, superSAnliegend));
+
+	vector<shared_ptr<Knoten>>::iterator iterKnoten = this->knotenListe.begin();
+	for (; iterKnoten != this->knotenListe.end(); ++iterKnoten) {
+		if ((*iterKnoten)->getBalance() > 0) {
+			superQNachbarn.push_back(shared_ptr<Knoten>((*iterKnoten)));
+			shared_ptr<Kante> k = make_shared<Kante>(knotenListe[superQ], knotenListe[(*iterKnoten)->getKnotenNummer()], 1, 0, (*iterKnoten)->getBalance(), 0, false);
+			superQAnliegend.push_back(k);
+			this->kantenListe.push_back(k);
+		}
+		else if ((*iterKnoten)->getBalance() < 0) {
+			superSNachbarn.push_back(shared_ptr<Knoten>((*iterKnoten)));
+			shared_ptr<Kante> k = make_shared<Kante>(knotenListe[(*iterKnoten)->getKnotenNummer()], knotenListe[superS], 1, 0, (-1* (*iterKnoten)->getBalance()), 0, false);
+			superSAnliegend.push_back(k);
+			this->kantenListe.push_back(k);
+		}
+	}
+
+	if (this->fordFulkerson(superQ, superS, k).empty()) {
+		kosten = INFINITY;
+		return vector<shared_ptr<Kante>>();
+	}
+
+	//prüfen ob gültiger b-Fluss
+	vector<shared_ptr<Kante>>::iterator iterSuperQ = knotenListe[superQ]->anliegendeKanten.begin();
+	for (; iterSuperQ != knotenListe[superQ]->anliegendeKanten.end(); ++iterSuperQ) {
+		if ((*iterSuperQ)->getFlusswert() != (*iterSuperQ)->getKapazität()) {
+			kosten = INFINITY;
+			return vector<shared_ptr<Kante>>();
+		}
+	}
+
+	vector<shared_ptr<Kante>>::iterator iterSuperS = knotenListe[superS]->anliegendeKanten.begin();
+	for (; iterSuperS != knotenListe[superS]->anliegendeKanten.end(); ++iterSuperS) {
+		if ((*iterSuperS)->getFlusswert() != (*iterSuperS)->getKapazität()) {
+			kosten = INFINITY;
+			return vector<shared_ptr<Kante>>();
+		}
+	}
+	
+	//entfernen super quelle und senke
+	vector<shared_ptr<Kante>>::iterator iterKanten = kantenListe.begin();
+	for (; iterKanten != kantenListe.end();) {
+		if ((*iterKanten)->getLinks()->getKnotenNummer() == superQ || (*iterKanten)->getRechts()->getKnotenNummer() == superS) {
+			iterKanten=kantenListe.erase(iterKanten);
+		}
+		else
+		{
+			++iterKanten;
+		}
+	}
+
+	knotenListe.pop_back();
+	knotenListe.pop_back();
+
+	vector<shared_ptr<KWBNode>> cycle;
+	do {
+		shared_ptr<Graph> res = getResidualgraph();
+
+		for (int i = 0; i < knotenListe.size(); i++) {
+			cycle = res->MooreBellmanFord(i, true);
+			if (!cycle.empty())
+				break;
+		}
+		
+
+		vector<shared_ptr<Kante>> cycleKanten = vector<shared_ptr<Kante>>();
+		for (int i = 0; i < cycle.size(); i++) {
+			cycleKanten.push_back(res->knotenListe[cycle[i]->vorgaenger->knotenNr]->getGuenstigsteKantezuKnoten(cycle[i]->knotenNr));
+		}
+
+		double gamma = INFINITY;
+		for (int i = 0; i < cycleKanten.size(); i++) {
+			if (gamma > cycleKanten[i]->getKapazität()) {
+				gamma = cycleKanten[i]->getKapazität();
+			}
+		}
+
+		vector<shared_ptr<Kante>>::iterator iterCycleKanten = cycleKanten.begin();
+		for (; iterCycleKanten != cycleKanten.end(); ++iterCycleKanten) {
+			if ((*iterCycleKanten)->getResidualNatur()) {
+				shared_ptr<Kante> k = this->knotenListe[(*iterCycleKanten)->getRechts()->getKnotenNummer()]->getGuenstigsteKantezuKnoten((*iterCycleKanten)->getLinks()->getKnotenNummer());
+				k->setFlusswert((k->getFlusswert() - gamma));
+			}
+			else {
+				shared_ptr<Kante> k = this->knotenListe[(*iterCycleKanten)->getLinks()->getKnotenNummer()]->getGuenstigsteKantezuKnoten((*iterCycleKanten)->getRechts()->getKnotenNummer());
+				k->setFlusswert((k->getFlusswert() + gamma));
+			}
+		}
+	} while (!cycle.empty());
+	
+	vector<shared_ptr<Kante>> fluss = vector<shared_ptr<Kante>>();
+	iterKanten = this->kantenListe.begin();
+	for (; iterKanten != kantenListe.end(); ++iterKanten) {
+		if ((*iterKanten)->getFlusswert() > 0) {
+			kosten += ((*iterKanten)->getFlusswert()*(*iterKanten)->getGewicht());
+			fluss.push_back((*iterKanten));
+		}
+	}
+	cout << kosten << endl;
 	return fluss;
 }

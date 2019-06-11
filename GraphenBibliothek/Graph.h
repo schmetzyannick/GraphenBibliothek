@@ -33,26 +33,26 @@ private:
 	bool gerichtet;
 	bool gewichtet;
 	vector<shared_ptr<Kante>> kantenListe;
-	vector<Knoten> knotenListe;
+	vector<shared_ptr<Knoten>> knotenListe;
 
 public:
 	Graph(bool, bool);
-	Graph(bool, bool, vector<shared_ptr<Kante>>, vector<Knoten>);
+	Graph(bool, bool, vector<shared_ptr<Kante>>, vector<shared_ptr<Knoten>>);
 
 	//getter
 	bool getGerichtet();
 	bool getGewichtet();
 	vector<shared_ptr<Kante>> getKantenListe();
-	vector<Knoten> getKnotenListe();
+	vector<shared_ptr<Knoten>> getKnotenListe();
 
 	//setter
 	void setGerichtet(bool);
 	void setGewichtet(bool);
 	void setKantenListe(vector<shared_ptr<Kante>>);
-	void setKnotenListe(vector<Knoten>);
+	void setKnotenListe(vector<shared_ptr<Knoten>>);
 
 	//einlesen
-	void GraphFromTextfile(bool);
+	void GraphFromTextfile(bool, bool);
 
 	//P1: Breitensuche
 	inline void Breitensuche(int start);
@@ -81,7 +81,7 @@ public:
 	//P4
 private:
 	vector<shared_ptr<KWBNode>> Dijkstra(int);
-	vector<shared_ptr<KWBNode>> MooreBellmanFord(int);
+	vector<shared_ptr<KWBNode>> MooreBellmanFord(int, bool findCycle=false);
 public:
 	deque<shared_ptr<Kante>> DijkstraSTP(int, int, double &kosten);
 	deque<shared_ptr<Kante>> MooreBellmanFordSTP(int, int, double &kosten);
@@ -93,4 +93,10 @@ private:
 	void updateKnotenKanten();
 public:
 	vector<shared_ptr<Kante>> fordFulkerson(int s, int t, double &kosten);
+
+	//P6
+private:
+	shared_ptr<Graph> getResidualgraph();
+public:
+	vector<shared_ptr<Kante>> CycleCancelingCMF(double &kosten);
 };

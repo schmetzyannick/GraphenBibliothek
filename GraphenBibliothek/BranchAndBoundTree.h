@@ -8,11 +8,11 @@ public:
 	double kostenBisher;
 	vector<Node*> nachfolger;
 	vector<Kante> genutzteKanten;
-	Knoten knoten;
+	shared_ptr<Knoten> knoten;
 	//besser in rekursiven aufruf von bandb verschieben => weniger Aufwand
 	shared_ptr<vector<bool>> besuchteKnoten;
 
-	Node(double, Knoten, shared_ptr<vector<bool>>);
+	Node(double, shared_ptr<Knoten>, shared_ptr<vector<bool>>);
 	Node() {};
 };
 
@@ -23,5 +23,5 @@ public:
 	vector<Kante> tour;
 	Node root;
 
-	BABTree(Knoten,int);
+	BABTree(shared_ptr<Knoten>,int);
 };

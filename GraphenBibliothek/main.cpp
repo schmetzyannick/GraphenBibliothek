@@ -93,8 +93,21 @@ int main() {
 	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);
 	cout << kosten1 << endl;*/
 
+	//P5
+	//try {
+	//	g.GraphFromTextfile(true, false);
+	//}
+	//catch (exception e) {
+	//	cout << e.what() << endl;
+	//	system("pause");
+	//	return -1;
+	//}
+	//double kosten=0.0;
+	//g.fordFulkerson(0, 7, kosten);
+
+	//P6
 	try {
-		g.GraphFromTextfile(true);
+		g.GraphFromTextfile(true, true);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
@@ -102,8 +115,7 @@ int main() {
 		return -1;
 	}
 	double kosten=0.0;
-	g.fordFulkerson(0, 7, kosten);
-
+	g.CycleCancelingCMF(kosten);
 	system("pause");
 	return 0;
 }

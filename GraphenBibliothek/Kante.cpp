@@ -11,7 +11,7 @@ Kante::Kante()
 	this->resKante = false;
 }
 
-Kante::Kante(Knoten* links, Knoten* rechts, int richtung/*=0*/, double gewicht/*=0.0.*/)
+Kante::Kante(shared_ptr<Knoten> links, shared_ptr<Knoten> rechts, int richtung/*=0*/, double gewicht/*=0.0.*/)
 {
 	this->links = links;
 	this->rechts = rechts;
@@ -27,7 +27,7 @@ Kante::Kante(Knoten* links, Knoten* rechts, int richtung/*=0*/, double gewicht/*
 	this->resKante = false;
 }
 
-Kante::Kante(Knoten* links, Knoten* rechts, int richtung, double gewicht, double kapa, double flussert, bool resKante)
+Kante::Kante(shared_ptr<Knoten> links, shared_ptr<Knoten> rechts, int richtung, double gewicht, double kapa, double flussert, bool resKante)
 {
 	this->links = links;
 	this->rechts = rechts;
@@ -43,12 +43,12 @@ Kante::Kante(Knoten* links, Knoten* rechts, int richtung, double gewicht, double
 	this->resKante = resKante;
 }
 
-Knoten* Kante::getLinks()
+shared_ptr<Knoten> Kante::getLinks()
 {
 	return links;
 }
 
-Knoten* Kante::getRechts()
+shared_ptr<Knoten> Kante::getRechts()
 {
 	return rechts;
 }
@@ -83,12 +83,12 @@ double Kante::getFlusswert()
 	return this->flusswert;
 }
 
-void Kante::setLinks(Knoten* l)
+void Kante::setLinks(shared_ptr<Knoten> l)
 {
 	this->links = l;
 }
 
-void Kante::setRechts(Knoten* r)
+void Kante::setRechts(shared_ptr<Knoten> r)
 {
 	this->rechts = r;
 }

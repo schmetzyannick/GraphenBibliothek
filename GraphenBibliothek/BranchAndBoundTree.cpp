@@ -1,6 +1,6 @@
 #include "BranchAndBoundTree.h"
 
-Node::Node(double kosten, Knoten k, shared_ptr<vector<bool>> besuchteKnoten)
+Node::Node(double kosten, shared_ptr<Knoten> k, shared_ptr<vector<bool>> besuchteKnoten)
 {
 	kostenBisher = kosten;
 	knoten = k;
@@ -9,13 +9,13 @@ Node::Node(double kosten, Knoten k, shared_ptr<vector<bool>> besuchteKnoten)
 	this->genutzteKanten = vector<Kante>();
 }
 
-BABTree::BABTree(Knoten k, int size)
+BABTree::BABTree(shared_ptr<Knoten> k, int size)
 {
 	shared_ptr<vector<bool>> besuchteKnoten = make_shared<vector<bool>>();
 	for (int i = 0; i < size; i++) {
 		besuchteKnoten->push_back(false);
 	}
-	besuchteKnoten->at(k.getKnotenNummer()) = true;
+	besuchteKnoten->at(k->getKnotenNummer()) = true;
 	root = Node(0.0, k, besuchteKnoten);
 	besteTour = INFINITY;
 }

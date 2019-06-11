@@ -8,6 +8,8 @@ Knoten::Knoten()
 	this->marked = false;
 	this->nachbarn = vector<shared_ptr<Knoten>>();
 	this->anliegendeKanten = vector<shared_ptr<Kante>>();
+	this->aktuelleBalance = 0.0;
+	this->balance = 0.0;
 }
 
 Knoten::Knoten(int nr, bool marked, vector<shared_ptr<Knoten>> nachbarn, vector<shared_ptr<Kante>> anliegendeKanten)
@@ -16,6 +18,8 @@ Knoten::Knoten(int nr, bool marked, vector<shared_ptr<Knoten>> nachbarn, vector<
 	this->marked = marked;
 	this->nachbarn = nachbarn;
 	this->anliegendeKanten = anliegendeKanten;
+	this->aktuelleBalance = 0.0;
+	this->balance = 0.0;
 }
 
 int Knoten::getKnotenNummer()
@@ -26,6 +30,16 @@ int Knoten::getKnotenNummer()
 bool Knoten::isMarked()
 {
 	return this->marked;
+}
+
+double Knoten::getAktuelleBalance()
+{
+	return this->aktuelleBalance;
+}
+
+double Knoten::getBalance()
+{
+	return this->balance;
 }
 
 //zweiter meber als sortierte liste => weniger Aufwand
@@ -90,6 +104,16 @@ shared_ptr<Kante> Knoten::getGuenstigsteKantezuKnoten(int knoten)
 void Knoten::setKnotenNummer(int nr)
 {
 	this->knotenNummer = nr;
+}
+
+void Knoten::setAktuelleBalance(double b)
+{
+	this->aktuelleBalance = b;
+}
+
+void Knoten::setBalance(double b)
+{
+	this->balance = b;
 }
 
 void Knoten::markKnoten()

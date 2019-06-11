@@ -9,6 +9,8 @@ class Knoten {
 private:
 	int knotenNummer;
 	bool marked;
+	double balance;
+	double aktuelleBalance;
 
 public:
 	vector<shared_ptr<Knoten>> nachbarn;
@@ -19,13 +21,13 @@ public:
 
 	int getKnotenNummer();
 	bool isMarked();
+	double getAktuelleBalance();
+	double getBalance();
 	vector<shared_ptr<Kante>> getKantenlisteSortet();
-	vector<Kante> getKantenlisteSortetNonPtr();
-	Kante getGuenstigsteKante();
 	shared_ptr<Kante> getGuenstigsteKantezuKnoten(int);
-	Kante* getKanteZuKnoten(int);
 
 	void markKnoten();
 	void setKnotenNummer(int);
-	
+	void setAktuelleBalance(double);
+	void setBalance(double);
 };
