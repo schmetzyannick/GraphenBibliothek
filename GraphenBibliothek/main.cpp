@@ -42,7 +42,7 @@ int main() {
 
 	Graph g = Graph(gerichtet, gewichtet);
 	/*try {
-		g.GraphFromTextfile(false);
+		g.GraphFromTextfile(false, false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
@@ -86,24 +86,25 @@ int main() {
 	vector<Kante> alle = g.TSPAusprobieren();*/
 	
 	//P4
-	/*double kosten = 0.0;
-	deque<shared_ptr<Kante>> weg = g.DijkstraSTP(0, 1, kosten);
-	cout << kosten << endl;
-	double kosten1 = 0.0;
-	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(0, 1, kosten1);
+	//double kosten = 0.0;
+	//deque<shared_ptr<Kante>> weg = g.DijkstraSTP(0, 1, kosten);
+	//cout << kosten << endl;
+	/*double kosten1 = 0.0;
+	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(2, 0, kosten1);
 	cout << kosten1 << endl;*/
 
 	//P5
-	//try {
-	//	g.GraphFromTextfile(true, false);
-	//}
-	//catch (exception e) {
-	//	cout << e.what() << endl;
-	//	system("pause");
-	//	return -1;
-	//}
-	//double kosten=0.0;
-	//g.fordFulkerson(0, 7, kosten);
+	/*try {
+		g.GraphFromTextfile(true, false);
+	}
+	catch (exception e) {
+		cout << e.what() << endl;
+		system("pause");
+		return -1;
+	}
+	double kosten=0.0;
+	g.fordFulkerson(2, 0, kosten);
+	cout << kosten << endl;*/
 
 	//P6
 	try {
@@ -115,8 +116,8 @@ int main() {
 		return -1;
 	}
 	double kosten=0.0;
-	//g.CycleCancelingCMF(kosten);
-	g.SuccesivShortestPathCMF(kosten);
+	g.CycleCancelingCMF(kosten);
+	//g.SuccesivShortestPathCMF(kosten);
 	system("pause");
 	return 0;
 }

@@ -711,8 +711,9 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 		}
 	}
 
+	vector<int> changedInLastIter = vector<int>();
 	//Schritt2
-	for (int i = 0; i < knotenListe.size() - 1; i++) {
+	for (int i = 0; i < knotenListe.size()-1; i++) {
 		vector<shared_ptr<Kante>>::iterator iter = this->kantenListe.begin();
 		for (; iter != this->kantenListe.end(); ++iter) {
 
@@ -720,6 +721,9 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 				< kwbNodes[(*iter)->getRechts()->getKnotenNummer()]->distanz) {
 				kwbNodes[(*iter)->getRechts()->getKnotenNummer()]->distanz = kwbNodes[(*iter)->getLinks()->getKnotenNummer()]->distanz + (*iter)->getGewicht();
 				kwbNodes[(*iter)->getRechts()->getKnotenNummer()]->vorgaenger = kwbNodes[(*iter)->getLinks()->getKnotenNummer()];
+				if (findCycle && i == kantenListe.size() - 2) {
+					changedInLastIter.push_back((*iter)->getRechts()->getKnotenNummer());
+				}
 			}
 
 			if (this->gerichtet == false) {
@@ -746,21 +750,28 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 				for (int j = 0; j < knotenListe.size(); j++) {
 					visited[j] = false;
 				}
-				visited[i] = true;
-				vector<shared_ptr<KWBNode>> kantenCycle = vector<shared_ptr<KWBNode>>();
-				kantenCycle.push_back(kwbNodes[(*iter)->getLinks()->getKnotenNummer()]);
-				while (true) {
-					if (visited[kwbNodes[i]->vorgaenger->knotenNr] == true) { break; }
-					kantenCycle.push_back(kwbNodes[i]->vorgaenger);
+
+				//einen Knoten aus dem zyklus finden
+				while (visited[i]==false) {
 					visited[i] = true;
 					i = kwbNodes[i]->vorgaenger->knotenNr;
 				}
+
+				vector<shared_ptr<KWBNode>> kantenCycle = vector<shared_ptr<KWBNode>>();
+				int laufVar=i;
+				do {
+					kantenCycle.push_back(kwbNodes[laufVar]->vorgaenger);
+					laufVar = kwbNodes[laufVar]->vorgaenger->knotenNr;
+				} while (laufVar != i);
+				
+
 				return kantenCycle;
 			}
 			else {
 				kwbNodes.clear();
 				break;
 			}
+			cout << "cycle" << endl;
 		}
 		if (this->gerichtet == false) {
 			//andersrum betrachten
@@ -777,6 +788,7 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 		kwbNodes.clear();
 		return kwbNodes;
 	}
+	cout << "ok" << endl;
 	return kwbNodes;
 }
 
@@ -1018,6 +1030,7 @@ shared_ptr<Graph> Graph::getResidualgraph()
 
 		shared_ptr<Kante> vor = make_shared<Kante>((*iterKanten)->getLinks(), (*iterKanten)->getRechts(), 1, (*iterKanten)->getConstGewicht(),
 			((*iterKanten)->getKapazität() - (*iterKanten)->getFlusswert()), 0, false);
+
 		shared_ptr<Kante> rueck = make_shared<Kante>((*iterKanten)->getRechts(), (*iterKanten)->getLinks(), 1, (-1*(*iterKanten)->getConstGewicht()),
 			((*iterKanten)->getFlusswert()), 0, true);
 
@@ -1120,12 +1133,26 @@ vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 	do {
 		shared_ptr<Graph> res = getResidualgraph();
 
+		bool *visited = new bool[this->knotenListe.size()];
+		for (int i = 0; i < knotenListe.size(); i++) {
+			visited[i] = false;
+		}
+
 		for (int i = 0; i < knotenListe.size(); i++) {
 			cycle = res->MooreBellmanFord(i, true);
 			if (!cycle.empty())
 				break;
+			else {
+				for (int j = 0; j < cycle.size(); j++) {
+					visited[cycle[j]->knotenNr] = true;
+				}
+				for (int j = 0; j < cycle.size(); j++) {
+					if (visited[cycle[j]->knotenNr] == false) {
+						i = j - 1;
+					}
+				}
+			}
 		}
-		
 
 		vector<shared_ptr<Kante>> cycleKanten = vector<shared_ptr<Kante>>();
 		for (int i = 0; i < cycle.size(); i++) {
@@ -1151,7 +1178,8 @@ vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 			}
 		}
 	} while (!cycle.empty());
-	
+
+
 	vector<shared_ptr<Kante>> fluss = vector<shared_ptr<Kante>>();
 	iterKanten = this->kantenListe.begin();
 	for (; iterKanten != kantenListe.end(); ++iterKanten) {
@@ -1253,8 +1281,7 @@ vector<shared_ptr<Kante>> Graph::SuccesivShortestPathCMF(double & kosten)
 			}
 			else {
 				shared_ptr<Kante> k = this->knotenListe[(*iterP)->getLinks()->getKnotenNummer()]->getGuenstigsteKantezuKnoten((*iterP)->getRechts()->getKnotenNummer());
-				double x = (k->getFlusswert() + gamma);
-				k->setFlusswert(x);
+				k->setFlusswert((k->getFlusswert() + gamma));
 			}
 		}
 		
