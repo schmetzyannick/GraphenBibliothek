@@ -99,4 +99,5 @@ private:
 	shared_ptr<Graph> getResidualgraph();
 public:
 	vector<shared_ptr<Kante>> CycleCancelingCMF(double &kosten);
+	vector<shared_ptr<Kante>> SuccesivShortestPathCMF(double &kosten);
 };

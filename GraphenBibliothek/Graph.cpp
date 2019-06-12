@@ -173,11 +173,11 @@ void Graph::GraphFromTextfile(bool kapazität, bool balancen)
 	vector<shared_ptr<Kante>>::iterator iterKante = this->kantenListe.begin();
 	for (; iterKante != kantenListe.end(); ++iterKante) {
 		if (gerichtet) {
-			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
+			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(shared_ptr<Kante>((*iterKante)));
 		}
 		else {
-			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
-			knotenListe[(*iterKante)->getRechts()->getKnotenNummer()]->anliegendeKanten.push_back(make_shared<Kante>(*(*iterKante)));
+			knotenListe[(*iterKante)->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(shared_ptr<Kante>((*iterKante)));
+			knotenListe[(*iterKante)->getRechts()->getKnotenNummer()]->anliegendeKanten.push_back(shared_ptr<Kante>((*iterKante)));
 		}
 	}
 	return;
@@ -1152,6 +1152,122 @@ vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 		}
 	} while (!cycle.empty());
 	
+	vector<shared_ptr<Kante>> fluss = vector<shared_ptr<Kante>>();
+	iterKanten = this->kantenListe.begin();
+	for (; iterKanten != kantenListe.end(); ++iterKanten) {
+		if ((*iterKanten)->getFlusswert() > 0) {
+			kosten += ((*iterKanten)->getFlusswert()*(*iterKanten)->getGewicht());
+			fluss.push_back((*iterKanten));
+		}
+	}
+	cout << kosten << endl;
+	return fluss;
+}
+
+vector<shared_ptr<Kante>> Graph::SuccesivShortestPathCMF(double & kosten)
+{
+	//negative Kanten belasten
+	vector<shared_ptr<Kante>>::iterator iterKanten = kantenListe.begin();
+	for (; iterKanten != kantenListe.end(); ++iterKanten) {
+		if ((*iterKanten)->getGewicht() < 0) {
+			(*iterKanten)->setFlusswert((*iterKanten)->getKapazität());
+		}
+	}
+
+	//aktuelle Balancen berechenen
+	vector<shared_ptr<Knoten>> pseudoQuelle = vector<shared_ptr<Knoten>>();
+	vector<shared_ptr<Knoten>> pseudoSenken = vector<shared_ptr<Knoten>>();
+	for (int i = 0; i < knotenListe.size(); i++) {
+		double eingehend = 0.0;
+		double ausgehend = 0.0;
+		vector<shared_ptr<Kante>>::iterator iterKantenListe = kantenListe.begin();
+		for (; iterKantenListe != kantenListe.end(); ++iterKantenListe) {
+			if ((*iterKantenListe)->getLinks()->getKnotenNummer()==i) {
+				ausgehend+=(*iterKantenListe)->getFlusswert();
+			}
+			else if ((*iterKantenListe)->getRechts()->getKnotenNummer() == i) {
+				eingehend+= (*iterKantenListe)->getFlusswert();
+			}
+		}
+
+		knotenListe[i]->setAktuelleBalance(ausgehend - eingehend);
+
+		if (knotenListe[i]->getBalance() - knotenListe[i]->getAktuelleBalance() > 0) {
+			pseudoQuelle.push_back(knotenListe[i]);
+		}
+		else if (knotenListe[i]->getBalance() - knotenListe[i]->getAktuelleBalance() < 0) {
+			pseudoSenken.push_back(knotenListe[i]);
+		}
+	}
+
+	while (!pseudoQuelle.empty() || !pseudoSenken.empty())
+	{
+		if (pseudoQuelle.empty()) {
+			cout << "Es sind nur noch Pseudo-Senken verfügbar!" << endl;
+			kosten = INFINITY;
+			return vector<shared_ptr<Kante>>();
+		}
+		shared_ptr<Graph> res = getResidualgraph();
+		shared_ptr<Knoten> s = pseudoQuelle[pseudoQuelle.size() - 1];
+		shared_ptr<Knoten> t = nullptr;
+
+		int *parent = new int[knotenListe.size()];
+		vector<shared_ptr<Knoten>>::iterator iterPseudoSenken = pseudoSenken.begin();
+		for (; iterPseudoSenken != pseudoSenken.end(); ++iterPseudoSenken) {
+			if (res->bfs(res, s->getKnotenNummer(), (*iterPseudoSenken)->getKnotenNummer(), parent) == true) {
+				t = (*iterPseudoSenken);
+				break;
+			}
+		}
+
+		if (t == nullptr) {
+			cout << "Zu einer Pseudo-Quelle konnte keine Pseudo-Senke gefunden werden!" << endl;
+			kosten = INFINITY;
+			return vector<shared_ptr<Kante>>();
+		}
+
+		double cost;
+		deque<shared_ptr<Kante>> p = res->MooreBellmanFordSTP(s->getKnotenNummer(), t->getKnotenNummer(), cost);
+		deque<shared_ptr<Kante>>::iterator iterP = p.begin();
+
+		double gamma = INFINITY;
+		for (; iterP != p.end(); ++iterP) {
+			if (gamma > (*iterP)->getKapazität()) {
+				gamma = (*iterP)->getKapazität();
+			}
+		}
+
+		if (gamma > (s->getBalance() - s->getAktuelleBalance())) {
+			gamma = s->getBalance() - s->getAktuelleBalance();
+		}
+
+		if (gamma > (t->getAktuelleBalance() - t->getBalance())) {
+			gamma = t->getAktuelleBalance() - t->getBalance();
+		}
+
+		iterP= p.begin();
+		for (; iterP != p.end(); ++iterP) {
+			if ((*iterP)->getResidualNatur()) {
+				shared_ptr<Kante> k = this->knotenListe[(*iterP)->getRechts()->getKnotenNummer()]->getGuenstigsteKantezuKnoten((*iterP)->getLinks()->getKnotenNummer());
+				k->setFlusswert((k->getFlusswert() - gamma));
+			}
+			else {
+				shared_ptr<Kante> k = this->knotenListe[(*iterP)->getLinks()->getKnotenNummer()]->getGuenstigsteKantezuKnoten((*iterP)->getRechts()->getKnotenNummer());
+				double x = (k->getFlusswert() + gamma);
+				k->setFlusswert(x);
+			}
+		}
+		
+		s->setAktuelleBalance(s->getAktuelleBalance() + gamma);
+		t->setAktuelleBalance(t->getAktuelleBalance() - gamma);
+		if (s->getAktuelleBalance() == s->getBalance()) {
+			pseudoQuelle.pop_back();
+		}
+		if (t->getAktuelleBalance() == t->getBalance()) {
+			iterPseudoSenken = pseudoSenken.erase(iterPseudoSenken);
+		}
+	}
+		
 	vector<shared_ptr<Kante>> fluss = vector<shared_ptr<Kante>>();
 	iterKanten = this->kantenListe.begin();
 	for (; iterKanten != kantenListe.end(); ++iterKanten) {
