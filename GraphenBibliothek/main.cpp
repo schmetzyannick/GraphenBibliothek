@@ -116,8 +116,8 @@ int main() {
 		return -1;
 	}
 	double kosten=0.0;
-	g.CycleCancelingCMF(kosten);
-	//g.SuccesivShortestPathCMF(kosten);
+	//g.CycleCancelingCMF(kosten);
+	g.SuccesivShortestPathCMF(kosten);
 	system("pause");
 	return 0;
 }

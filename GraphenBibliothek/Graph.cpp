@@ -771,7 +771,6 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 				kwbNodes.clear();
 				break;
 			}
-			cout << "cycle" << endl;
 		}
 		if (this->gerichtet == false) {
 			//andersrum betrachten
@@ -788,7 +787,6 @@ vector<shared_ptr<KWBNode>> Graph::MooreBellmanFord(int start, bool findCycle)
 		kwbNodes.clear();
 		return kwbNodes;
 	}
-	cout << "ok" << endl;
 	return kwbNodes;
 }
 
@@ -1063,6 +1061,7 @@ shared_ptr<Graph> Graph::getResidualgraph()
 vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 {
 	double k;
+	kosten = 0.0;
 
 	//einführen super quelle und senke für ford fulkerson
 	int superQ = this->knotenListe.size();
@@ -1092,11 +1091,8 @@ vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 		}
 	}
 
-	if (this->fordFulkerson(superQ, superS, k).empty()) {
-		kosten = INFINITY;
-		return vector<shared_ptr<Kante>>();
-	}
-
+	fordFulkerson(superQ, superS, k);
+	
 	//prüfen ob gültiger b-Fluss
 	vector<shared_ptr<Kante>>::iterator iterSuperQ = knotenListe[superQ]->anliegendeKanten.begin();
 	for (; iterSuperQ != knotenListe[superQ]->anliegendeKanten.end(); ++iterSuperQ) {
@@ -1133,6 +1129,7 @@ vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 	do {
 		shared_ptr<Graph> res = getResidualgraph();
 
+		//funktioniert so nicht
 		bool *visited = new bool[this->knotenListe.size()];
 		for (int i = 0; i < knotenListe.size(); i++) {
 			visited[i] = false;
@@ -1148,7 +1145,7 @@ vector<shared_ptr<Kante>> Graph::CycleCancelingCMF(double &kosten)
 				}
 				for (int j = 0; j < cycle.size(); j++) {
 					if (visited[cycle[j]->knotenNr] == false) {
-						i = j - 1;
+						i = cycle[j]->knotenNr - 1;
 					}
 				}
 			}
