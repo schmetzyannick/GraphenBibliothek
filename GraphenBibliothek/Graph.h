@@ -92,6 +92,7 @@ private:
 	bool bfs(shared_ptr<Graph> g, int s, int t, int *parent);
 	deque<shared_ptr<Kante>> bfs(shared_ptr<Graph> g, int s, int t);
 	void updateKnotenKanten();
+	shared_ptr<Graph> getResidualgraphFF();
 public:
 	vector<shared_ptr<Kante>> fordFulkerson(int s, int t, double &kosten);
 

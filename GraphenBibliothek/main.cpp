@@ -55,11 +55,11 @@ int main() {
 	//cout << g.Zusammenhangskomponenten() << " Zusammenhangskomponenten" << endl;
 
 	//P2
-	/*cout << "\nKruskal: \n";
-	g.KruskalMST();
-	cout << "\nPrim: \n";
-	g.PrimMST(0);
-	system("pause");*/
+	//cout << "\nKruskal: \n";
+	//g.KruskalMST();
+	//cout << "\nPrim: \n";
+	//g.PrimMST(0);
+	//system("pause");
 
 	//P3
 	/*try {
@@ -81,30 +81,30 @@ int main() {
 	catch (exception e) {
 		cout << e.what() << endl;
 	}
-
-	vector<Kante> tour = g.BranchAndBoundTSP();
+	*/
+	/*vector<Kante> tour = g.BranchAndBoundTSP();
 	vector<Kante> alle = g.TSPAusprobieren();*/
 	
 	//P4
 	//double kosten = 0.0;
 	//deque<shared_ptr<Kante>> weg = g.DijkstraSTP(0, 1, kosten);
 	//cout << kosten << endl;
-	/*double kosten1 = 0.0;
-	deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(2, 0, kosten1);
-	cout << kosten1 << endl;*/
+	//double kosten1 = 0.0;
+	//deque<shared_ptr<Kante>> weg1 = g.MooreBellmanFordSTP(0,1, kosten1);
+	//cout << kosten1 << endl;
 
 	//P5
-	try {
-		g.GraphFromTextfile(true, false, false);
-	}
-	catch (exception e) {
-		cout << e.what() << endl;
-		system("pause");
-		return -1;
-	}
-	double kosten=0.0;
-	g.fordFulkerson(0, 1, kosten);
-	cout << kosten << endl;
+	//try {
+	//	g.GraphFromTextfile(true, false, false);
+	//}
+	//catch (exception e) {
+	//	cout << e.what() << endl;
+	//	system("pause");
+	//	return -1;
+	//}
+	//double kosten=0.0;
+	//g.fordFulkerson(0, 7, kosten);
+	//cout << kosten << endl;
 
 	//P6
 	/*try {
@@ -119,16 +119,16 @@ int main() {
 	g.CycleCancelingCMF(kosten);*/
 	//g.SuccesivShortestPathCMF(kosten);
 
-	/*int anzahl = 0;
+	int anzahl = 0;
 	try {
-		g.GraphFromTextfile(false, false, true);
+		g.GraphFromTextfile(true, false, true);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
 		system("pause");
 		return -1;
 	}
-	g.MaxMatching(anzahl);*/
+	g.MaxMatching(anzahl);
 	system("pause");
 	return 0;
 }

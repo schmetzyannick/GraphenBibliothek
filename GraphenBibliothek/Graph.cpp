@@ -922,21 +922,62 @@ void Graph::updateKnotenKanten()
 	}
 }
 
-vector<shared_ptr<Kante>> Graph::fordFulkerson(int s, int t, double &kosten)
+shared_ptr<Graph> Graph::getResidualgraphFF()
 {
-	shared_ptr<Graph> residualGraph = make_shared<Graph>(*this);
-	int beginResKanten = residualGraph->kantenListe.size();
-	//residualkanten
-	//in methode und dann auch in den knoten einfuegen
-	for (int i = 0; i < beginResKanten; i++) {
-		residualGraph->kantenListe.push_back(make_shared<Kante>(residualGraph->kantenListe[i]->getRechts(), residualGraph->kantenListe[i]->getLinks(), 1, 0.0, 0, 0, true));
-		shared_ptr<Kante> k = shared_ptr<Kante>(((residualGraph->kantenListe[residualGraph->kantenListe.size() - 1])));
-		shared_ptr<Kante> orig = shared_ptr<Kante>(((residualGraph->kantenListe[i])));
-		k->setResidualKante(orig);
-		residualGraph->kantenListe[i]->setResidualKante(k);
+
+	shared_ptr<Graph> res = make_unique<Graph>(*this);
+	vector<shared_ptr<Kante>> kantenOrignalGraph = vector<shared_ptr<Kante>>();
+	vector<shared_ptr<Knoten>> knotenOrignalGraph = vector<shared_ptr<Knoten>>();
+
+	vector<shared_ptr<Kante>>::iterator iter = res->kantenListe.begin();
+	for (; iter != res->kantenListe.end(); ++iter) {
+		kantenOrignalGraph.push_back(make_shared<Kante>(*(*iter)));
 	}
-	residualGraph->updateKnotenKanten();
-	double flusswert = 0.0;
+
+	vector<shared_ptr<Knoten>>::iterator iterKno = res->knotenListe.begin();
+	for (; iterKno != res->knotenListe.end(); ++iterKno) {
+		knotenOrignalGraph.push_back(make_shared<Knoten>(*(*iterKno)));
+	}
+
+	res->kantenListe.clear();
+	res->knotenListe.clear();
+
+	for (int i = 0; i < knotenOrignalGraph.size(); i++) {
+		vector<shared_ptr<Knoten>> nachbarn = vector<shared_ptr<Knoten>>();
+		vector<shared_ptr<Kante>> anliegend = vector<shared_ptr<Kante>>();
+		res->knotenListe.push_back(make_shared<Knoten>(i, false, nachbarn, anliegend));
+		res->knotenListe.back()->setBalance(knotenOrignalGraph[i]->getBalance());
+		res->knotenListe.back()->setAktuelleBalance(knotenOrignalGraph[i]->getAktuelleBalance());
+	}
+
+	vector<shared_ptr<Kante>>::iterator iterKanten = kantenOrignalGraph.begin();
+	for (; iterKanten != kantenOrignalGraph.end(); ++iterKanten) {
+
+		shared_ptr<Kante> vor = make_shared<Kante>((*iterKanten)->getLinks(), (*iterKanten)->getRechts(), 1, (*iterKanten)->getConstGewicht(),
+			((*iterKanten)->getKapazität() - (*iterKanten)->getFlusswert()), 0, false);
+
+		shared_ptr<Kante> rueck = make_shared<Kante>((*iterKanten)->getRechts(), (*iterKanten)->getLinks(), 1, (-1 * (*iterKanten)->getConstGewicht()),
+			((*iterKanten)->getFlusswert()), 0, true);
+
+		vor->setResidualKante(rueck);
+		rueck->setResidualKante(vor);
+
+		res->knotenListe[rueck->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(rueck);
+		res->knotenListe[rueck->getLinks()->getKnotenNummer()]->nachbarn.push_back(res->knotenListe[rueck->getRechts()->getKnotenNummer()]);
+		res->kantenListe.push_back(rueck);
+
+		res->knotenListe[vor->getLinks()->getKnotenNummer()]->anliegendeKanten.push_back(vor);
+		res->knotenListe[vor->getLinks()->getKnotenNummer()]->nachbarn.push_back(res->knotenListe[vor->getRechts()->getKnotenNummer()]);
+		res->kantenListe.push_back(vor);
+
+	}
+	return res;
+}
+
+vector<shared_ptr<Kante>> Graph::fordFulkerson(int s, int t, double &flusswert)
+{
+	shared_ptr<Graph> residualGraph = getResidualgraphFF();
+	flusswert = 0.0;
 	while (true) {
 		double cost;
 		deque<shared_ptr<Kante>> weg = residualGraph->bfs(residualGraph, s, t);
