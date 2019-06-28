@@ -40,9 +40,9 @@ int main() {
 	bool gewichtet;
 	gewichtetInt == 1 ? gewichtet = false : gewichtet = true;
 
-	Graph g = Graph(gerichtet, gewichtet);
+	Graph g(gerichtet, gewichtet);
 	/*try {
-		g.GraphFromTextfile(false, false);
+		g.GraphFromTextfile(false, false, false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
@@ -94,8 +94,8 @@ int main() {
 	cout << kosten1 << endl;*/
 
 	//P5
-	/*try {
-		g.GraphFromTextfile(true, false);
+	try {
+		g.GraphFromTextfile(true, false, false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
@@ -103,12 +103,12 @@ int main() {
 		return -1;
 	}
 	double kosten=0.0;
-	g.fordFulkerson(2, 0, kosten);
-	cout << kosten << endl;*/
+	g.fordFulkerson(0, 1, kosten);
+	cout << kosten << endl;
 
 	//P6
-	try {
-		g.GraphFromTextfile(true, true);
+	/*try {
+		g.GraphFromTextfile(true, true, false);
 	}
 	catch (exception e) {
 		cout << e.what() << endl;
@@ -116,8 +116,19 @@ int main() {
 		return -1;
 	}
 	double kosten=0.0;
-	//g.CycleCancelingCMF(kosten);
-	g.SuccesivShortestPathCMF(kosten);
+	g.CycleCancelingCMF(kosten);*/
+	//g.SuccesivShortestPathCMF(kosten);
+
+	/*int anzahl = 0;
+	try {
+		g.GraphFromTextfile(false, false, true);
+	}
+	catch (exception e) {
+		cout << e.what() << endl;
+		system("pause");
+		return -1;
+	}
+	g.MaxMatching(anzahl);*/
 	system("pause");
 	return 0;
 }

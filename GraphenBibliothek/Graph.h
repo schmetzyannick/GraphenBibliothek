@@ -34,6 +34,7 @@ private:
 	bool gewichtet;
 	vector<shared_ptr<Kante>> kantenListe;
 	vector<shared_ptr<Knoten>> knotenListe;
+	string file;
 
 public:
 	Graph(bool, bool);
@@ -52,7 +53,7 @@ public:
 	void setKnotenListe(vector<shared_ptr<Knoten>>);
 
 	//einlesen
-	void GraphFromTextfile(bool, bool);
+	void GraphFromTextfile(bool, bool, bool);
 
 	//P1: Breitensuche
 	inline void Breitensuche(int start);
@@ -100,4 +101,8 @@ private:
 public:
 	vector<shared_ptr<Kante>> CycleCancelingCMF(double &kosten);
 	vector<shared_ptr<Kante>> SuccesivShortestPathCMF(double &kosten);
+
+	//P7
+	shared_ptr<Graph> copyGraph();
+	vector<shared_ptr<Kante>> MaxMatching(int &counter);
 };
