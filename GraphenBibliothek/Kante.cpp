@@ -85,12 +85,12 @@ double Kante::getFlusswert()
 
 void Kante::setLinks(shared_ptr<Knoten> l)
 {
-	this->links = l;
+	this->links = shared_ptr<Knoten>(l);
 }
 
 void Kante::setRechts(shared_ptr<Knoten> r)
 {
-	this->rechts = r;
+	this->rechts = shared_ptr<Knoten>(r);
 }
 
 void Kante::setRichtung(int richtung)
